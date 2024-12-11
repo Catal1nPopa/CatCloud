@@ -1,17 +1,31 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.DTOs.Auth;
+using Application.Interfaces;
+using CatCloud.Models.User;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatCloud.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
+        private readonly IAuthService _authService = authService;
 
-        [HttpGet("Login")]
-        public ActionResult<string> Get()
+        [HttpPost("login")]
+        public async Task<ActionResult<string>> Login(UserCredentialsModel userCredentials)
         {
-            return Ok("ss");
+            return await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
+        }
+
+        [HttpPost("createUser")]
+        public async Task<IActionResult> CreateUser(UserModel userData)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            await _authService.CreateUser(userData.Adapt<UserDTO>());
+            return Created();
         }
     }
 }
