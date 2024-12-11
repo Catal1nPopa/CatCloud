@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Domain.Entities.Auth;
 using Domain.Interfaces;
+using Helper.Serilog;
 using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +52,7 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
+                LoggerHelper.LogWarning($"Eroare la autentificare username |{authRequest.UserName}|");
                 return ex.Message.ToString();
             }
         }

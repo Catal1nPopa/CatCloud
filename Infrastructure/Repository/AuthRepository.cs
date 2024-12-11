@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Auth;
 using Domain.Interfaces;
+using Helper.Serilog;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -32,6 +33,7 @@ namespace Infrastructure.Repository
             try
             {
                 var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Username == username);
+                LoggerHelper.LogInformation("test");
                 return user;
             }
             catch (NpgsqlException exception)
