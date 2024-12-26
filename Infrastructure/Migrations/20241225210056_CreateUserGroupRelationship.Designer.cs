@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    partial class CloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241225210056_CreateUserGroupRelationship")]
+    partial class CreateUserGroupRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,9 +70,6 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<double>("AvailableSpace")
-                        .HasColumnType("double precision");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone");
 
@@ -80,9 +80,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<double>("TotalSpace")
-                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 

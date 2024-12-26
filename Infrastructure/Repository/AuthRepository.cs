@@ -13,17 +13,24 @@ namespace Infrastructure.Repository
         {
             try
             {
-                _dbContext.Users.Add(userEntity);
-                await _dbContext.SaveChangesAsync();
+                var checkIfExist = await GetUserByUsername(userEntity.Username);
+                if (checkIfExist == null)
+                {
+                    _dbContext.Users.Add(userEntity);
+                    await _dbContext.SaveChangesAsync();
+                    LoggerHelper.LogInformation($"Utilizator creat : Email {userEntity.Email}, username: {userEntity.Username}, data : {userEntity.Added}, spatiu acordat : {userEntity.TotalStorage}");
+                }
+                else
+                    throw new Exception("Utilizator cu acest nume deja exista, alegeti alt nume va rog");
             }
             catch (NpgsqlException exception)
             {
-                //log exception
+                LoggerHelper.LogInformation($"A aparut o eroare la adaugarea utilizatorului in baza de date - {exception}");
                 throw new InvalidOperationException("A aparut o eroare la adaugarea utilizatorului in baza de date.", exception);
             }
             catch (Exception exception)
             {
-                //log exception
+                LoggerHelper.LogInformation($"A aparut o eroare la adaugare utilizator - {exception}");
                 throw new ApplicationException("A aparut o eroare la adaugare utilizator.", exception);
             }
         }
@@ -33,15 +40,16 @@ namespace Infrastructure.Repository
             try
             {
                 var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Username == username);
-                LoggerHelper.LogInformation("test");
                 return user;
             }
             catch (NpgsqlException exception)
             {
-                throw new InvalidOperationException($"Eroare la obtinerea din baza de date a utilizatorului : {username}");
+                LoggerHelper.LogInformation($"Eroare la obtinerea din baza de date a utilizatorului - {username}, exception - {exception}");
+                throw new InvalidOperationException($"Eroare la obtinerea din baza de date a utilizatorului : {username}", exception);
             }
             catch (Exception exception)
             {
+                LoggerHelper.LogInformation($"Eroare la obtinerea utilizator - {username}, exception - {exception}");
                 throw new ApplicationException($"Eroare la obtinerea utilizator : {username}");
             }
 

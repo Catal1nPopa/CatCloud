@@ -14,6 +14,5 @@ namespace CatCloud.Models.User
         [Range(0, 50)]
         public double TotalStorage { get; set; }
         public double AvailableStorage { get; set; }
-        public DateTime Added { get; set; }
     }
 }
