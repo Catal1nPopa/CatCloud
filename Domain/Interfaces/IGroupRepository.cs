@@ -1,4 +1,5 @@
-﻿using Domain.Entities.UserGroup;
+﻿using Domain.Entities.Auth;
+using Domain.Entities.UserGroup;
 
 namespace Domain.Interfaces
 {
@@ -6,7 +7,10 @@ namespace Domain.Interfaces
     {
         Task CreateGroup(GroupEntity groupEntity);
         Task DeleteGroup(Guid groupId);
+        Task EditGroup(GroupEntity updatedGroup);
         Task LinkUserToGroup(LinkUserToGroupEntity data);
         Task UnlinkUserFromGroup(LinkUserToGroupEntity data);
+        Task<List<GroupEntity>> GetUserGroups(Guid userId);
+        Task<List<UserEntity>> GetGroupUsers(Guid groupId);
     }
 }

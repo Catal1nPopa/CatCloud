@@ -11,5 +11,7 @@ namespace Application.DTOs.UserGroup
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime Created { get; set; }
+        public double TotalSpace { get; set; }
+        public double AvailableSpace { get; set; }
     }
 }

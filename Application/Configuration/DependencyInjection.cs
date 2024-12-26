@@ -11,10 +11,10 @@ namespace Application.Configuration
     {
         public static IServiceCollection ApplicationInjection(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddHelper(configuration);
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserGroupService, UserGroupService>();
             services.AddInfrastructure();
-            services.AddHelper(configuration);
             return services;
         }
     }

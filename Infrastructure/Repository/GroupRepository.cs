@@ -10,8 +10,13 @@ namespace Infrastructure.Repository
         private readonly CloudDbContext _dbContext = dbContext;
         public async Task CreateGroup(GroupEntity groupEntity)
         {
-            _dbContext.Groups.Add(groupEntity);
-            await _dbContext.SaveChangesAsync();
+            if (await _dbContext.Groups.FirstOrDefaultAsync(u => u.Name == groupEntity.Name) == null)
+            {
+                _dbContext.Groups.Add(groupEntity);
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+                throw new Exception($"Eroare la creare grup, grup existent");
         }
 
         public async Task DeleteGroup(Guid groupId)
@@ -27,6 +32,42 @@ namespace Infrastructure.Repository
                 throw new Exception("Grupul nu a fost găsit.");
             }
         }
+
+        public async Task EditGroup(GroupEntity updatedGroup)
+        {
+            try
+            {
+                var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == updatedGroup.Id);
+
+                if (group != null)
+                {
+                    var existingGroup = await _dbContext.Groups
+                        .FirstOrDefaultAsync(g => g.Name == updatedGroup.Name);
+
+                    if (existingGroup != null)
+                    {
+                        throw new Exception("Numele grupului este deja utilizat.");
+                    }
+
+                    group.Name = updatedGroup.Name;
+                    group.Description = updatedGroup.Description;
+                    group.TotalSpace = updatedGroup.TotalSpace;
+                    group.AvailableSpace = updatedGroup.AvailableSpace;
+
+                    _dbContext.Groups.Update(group);
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Grupul nu a fost găsit.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Eroare la editarea grupului: {ex.Message}");
+            }
+        }
+
 
         public async Task LinkUserToGroup(LinkUserToGroupEntity data)
         {
@@ -67,6 +108,47 @@ namespace Infrastructure.Repository
             else
             {
                 throw new Exception("Utilizatorul nu este asociat cu acest grup.");
+            }
+        }
+
+        public async Task<List<GroupEntity>> GetUserGroups(Guid userId)
+        {
+            try
+            {
+                var userGroups = await _dbContext.UserGroups
+                    .Where(ug => ug.UserId == userId)
+                    .Select(ug => ug.GroupId)
+                    .ToListAsync();
+
+                var groups = await _dbContext.Groups
+                    .Where(g => userGroups.Contains(g.Id))
+                    .ToListAsync();
+
+                return groups;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Eroare la obținerea grupurilor utilizatorului: {ex.Message}");
+            }
+        }
+
+        public async Task<List<UserEntity>> GetGroupUsers(Guid groupId)
+        {
+            try
+            {
+                var groupUsers = await _dbContext.UserGroups
+                    .Where(ug => ug.GroupId == groupId)
+                    .Select(ug => ug.UserId)
+                    .ToListAsync();
+
+                var users = await _dbContext.Users
+                    .Where(u => groupUsers.Contains(u.Id))
+                    .ToListAsync();
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Eroare la obținerea utilizatorilor grupului: {ex.Message}");
             }
         }
     }

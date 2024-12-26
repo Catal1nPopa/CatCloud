@@ -3,6 +3,7 @@ using Helper.Serilog;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Infrastructure.Configuration
 {
@@ -15,8 +16,20 @@ namespace Infrastructure.Configuration
 
             services.AddScoped<CloudDbContext>();
 
-            //services.AddDbContext<CloudDbContext>(options =>
-            //    options.UseNpgsql("Host=localhost;Port=5432;Database=CatCloud;Username=postgres;Password=admin;IncludeErrorDetail=true"));
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                try
+                {
+                    LoggerHelper.LogInformation("Creare conexiune cu baza de date");
+                    var dbContext = serviceProvider.GetRequiredService<CloudDbContext>();
+                    dbContext.Database.Migrate();
+                    LoggerHelper.LogInformation("Baza de date a fost conectata cu succes");
+                }
+                catch (Exception ex)
+                {
+                    LoggerHelper.LogError(ex, $"Eroare la initializarea bazei de date : {ex.Message}");
+                }
+            }
 
             return services;
         }
