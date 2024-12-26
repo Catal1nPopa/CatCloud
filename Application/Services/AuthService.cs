@@ -47,7 +47,6 @@ namespace Application.Services
                     SigningCredentials = credentials
                 };
                 var token = jwtHandler.CreateToken(tokenDescriptor);
-
                 return jwtHandler.WriteToken(token);
             }
             catch (Exception ex)

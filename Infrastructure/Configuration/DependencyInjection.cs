@@ -11,26 +11,12 @@ namespace Infrastructure.Configuration
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
 
             services.AddScoped<CloudDbContext>();
 
-            using (var scope = services.BuildServiceProvider().CreateScope())
-            {
-                var scopedServices = scope.ServiceProvider;
-
-                try
-                {
-                    LoggerHelper.LogInformation("Initializare baza de date");
-                    var context = scopedServices.GetRequiredService<CloudDbContext>();
-                    //context.Database.EnsureCreated();
-                    context.Database.Migrate();
-                    LoggerHelper.LogInformation("Initializare finisata");
-                }
-                catch (Exception ex)
-                {
-                    LoggerHelper.LogError(ex, $"Eroare la initializarea bazei de date : {ex.Message}");
-                }
-            }
+            //services.AddDbContext<CloudDbContext>(options =>
+            //    options.UseNpgsql("Host=localhost;Port=5432;Database=CatCloud;Username=postgres;Password=admin;IncludeErrorDetail=true"));
 
             return services;
         }

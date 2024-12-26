@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Domain.Entities.UserGroup;
+using System.Security.Cryptography;
 
 namespace Domain.Entities.Auth
 {
@@ -32,5 +33,7 @@ namespace Domain.Entities.Auth
             AvailableStorage = availableSpace;
             Added = added;
         }
+
+        public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
     }
 }
