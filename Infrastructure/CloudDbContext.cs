@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Auth;
+using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,12 @@ namespace Infrastructure
     {
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<GroupEntity> Groups { get; set; }
+        public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<UserGroupEntity> UserGroups { get; set; }
+        public DbSet<PermissionEntity> Permissions { get; set; }
+        public DbSet<RolePermissionEntity> RolePermissions { get; set; }
+        public DbSet<UserGroupRoleEntity> UserGroupRoles { get; set; }
+        public DbSet<UserRoleEntity> UserRoles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,6 +36,54 @@ namespace Infrastructure
                 .HasOne(ug => ug.Group)
                 .WithMany(g => g.UserGroups)
                 .HasForeignKey(ug => ug.GroupId);
+
+            // Configurare pentru UserGroupRole - cheie compusa
+            modelBuilder.Entity<UserGroupRoleEntity>()
+                .HasKey(ugr => new { ugr.UserId, ugr.GroupId, ugr.RoleId });
+
+            modelBuilder.Entity<UserGroupRoleEntity>()
+                .HasOne(ugr => ugr.User)
+                .WithMany(u => u.UserGroupRoles)
+                .HasForeignKey(ugr => ugr.UserId);
+
+            modelBuilder.Entity<UserGroupRoleEntity>()
+                .HasOne(ugr => ugr.Group)
+                .WithMany(g => g.UserGroupRoles)
+                .HasForeignKey(ugr => ugr.GroupId);
+
+            modelBuilder.Entity<UserGroupRoleEntity>()
+                .HasOne(ugr => ugr.Role)
+                .WithMany()
+                .HasForeignKey(ugr => ugr.RoleId);
+
+            // Configurare pentru RolePermission - cheie compusa
+            modelBuilder.Entity<RolePermissionEntity>()
+                .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+            modelBuilder.Entity<RolePermissionEntity>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId);
+
+            modelBuilder.Entity<RolePermissionEntity>()
+                .HasOne(rp => rp.Permission)
+                .WithMany()
+                .HasForeignKey(rp => rp.PermissionId);
+
+            //configurare user role many-to-many
+            modelBuilder.Entity<UserRoleEntity>()
+        .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            modelBuilder.Entity<UserRoleEntity>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<UserRoleEntity>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId);
+
             base.OnModelCreating(modelBuilder);
         }
     }
