@@ -1,0 +1,129 @@
+﻿using Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CatCloud.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PermissionController(IPermissionsService permissionsService) : ControllerBase
+    {
+        private readonly IPermissionsService _permissionsService = permissionsService;
+
+        [HttpPost("roles")]
+        public async Task<IActionResult> AddRole([FromBody] string roleName)
+        {
+            await _permissionsService.AddRole(roleName);
+            return Ok(new { Message = $"rol adaugat {roleName}"});
+        }
+
+        [HttpDelete("roles/{roleName}")]
+        public async Task<IActionResult> DeleteRole(string roleName)
+        {
+            await _permissionsService.DeleteRole(roleName);
+            return Ok();
+        }
+
+        [HttpGet("roles")]
+        public async Task<ActionResult<List<string>>> GetRoles()
+        {
+            return Ok(await _permissionsService.GetRoles());
+        }
+
+        [HttpPost("permissions")]
+        public async Task<IActionResult> AddPermission([FromBody] string permission)
+        {
+            await _permissionsService.AddPermission(permission);
+            return Ok();
+        }
+
+        [HttpDelete("permissions/{permission}")]
+        public async Task<IActionResult> DeletePermission(string permission)
+        {
+            await _permissionsService.DeletePermission(permission);
+            return Ok();
+        }
+
+        [HttpGet("permissions")]
+        public async Task<ActionResult<List<string>>> GetPermissions()
+        {
+            return Ok(await _permissionsService.GetPermissions());
+        }
+
+        [HttpPost("roles/{roleName}/permissions")]
+        public async Task<IActionResult> AssignPermissionsToRole(string roleName, [FromBody] List<string> permissions)
+        {
+            await _permissionsService.AssignPermissionsToRole(roleName, permissions);
+            return Ok(new { Message = $"Permisiunile au fost asignate rolului '{roleName}'." });
+        }
+
+        [HttpGet("roles/{roleName}/permissions")]
+        public async Task<ActionResult<List<string>>> GetRolePermissions(string roleName)
+        {
+            var permissions = await _permissionsService.GetRolePermissions(roleName);
+            return Ok(permissions);
+        }
+
+        [HttpPost("users/{userId}/roles")]
+        public async Task<IActionResult> AssignRoleToUser(Guid userId, [FromBody] string roleName)
+        {
+            try
+            {
+                await _permissionsService.AssignRoleToUser(userId, roleName);
+                return Ok(new { Message = $"Rolul '{roleName}' a fost asignat utilizatorului." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("users/{userId}/roles")]
+        public async Task<ActionResult<List<string>>> GetUserRoles(Guid userId)
+        {
+            var roles = await _permissionsService.GetUserRoles(userId);
+            return Ok(roles);
+        }
+
+        [HttpDelete("users/{userId}/roles/{roleName}")]
+        public async Task<IActionResult> RemoveRoleFromUser(Guid userId, string roleName)
+        {
+            await _permissionsService.RemoveRoleFromUser(userId, roleName);
+            return Ok(new { Message = $"Rolul '{roleName}' a fost eliminat." });
+        }
+
+        [HttpPost("groups/{groupId}/users/{userId}/roles")]
+        public async Task<IActionResult> AssignRoleToUserInGroup(Guid groupId, Guid userId, [FromBody] string roleName)
+        {
+            try
+            {
+                await _permissionsService.AssignRoleToUserInGroup(userId, groupId, roleName);
+                return Ok(new { Message = $"Rolul '{roleName}' a fost asignat utilizatorului în grupul '{groupId}'." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpDelete("groups/{groupId}/users/{userId}/roles/{roleName}")]
+        public async Task<IActionResult> RemoveRoleFromUserInGroup(Guid groupId, Guid userId, string roleName)
+        {
+            try
+            {
+                await _permissionsService.RemoveRoleFromUserInGroup(userId, groupId, roleName);
+                return Ok(new { Message = $"Rolul '{roleName}' a fost eliminat din grupul '{groupId}' pentru utilizator." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("groups/{groupId}/users/{userId}/roles")]
+        public async Task<ActionResult<List<string>>> GetUserRolesInGroup(Guid groupId, Guid userId)
+        {
+            var roles = await _permissionsService.GetUserRolesInGroup(userId, groupId);
+            return Ok(roles);
+        }
+    }
+}

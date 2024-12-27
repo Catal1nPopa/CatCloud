@@ -13,6 +13,7 @@ namespace Infrastructure.Configuration
         {
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IGroupRepository, GroupRepository>();
+            services.AddScoped<IPermissionsRepository, PermissionsRepository>();
 
             services.AddScoped<CloudDbContext>();
 

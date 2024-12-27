@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.UserGroup
+﻿using Domain.Entities.Permission;
+
+namespace Domain.Entities.UserGroup
 {
     public class GroupEntity
     {
@@ -10,5 +12,6 @@
         public DateTime Created { get; set; }
 
         public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
+        public ICollection<UserGroupRoleEntity> UserGroupRoles { get; set; } = new List<UserGroupRoleEntity>();
     }
 }

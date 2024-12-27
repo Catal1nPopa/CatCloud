@@ -14,6 +14,7 @@ namespace Application.Configuration
             services.AddHelper(configuration);
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserGroupService, UserGroupService>();
+            services.AddScoped<IPermissionsService, PermissionsService>();
             services.AddInfrastructure();
             return services;
         }

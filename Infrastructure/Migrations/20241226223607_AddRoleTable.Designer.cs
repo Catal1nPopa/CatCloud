@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    partial class CloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241226223607_AddRoleTable")]
+    partial class AddRoleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,21 +129,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserGroupRoles");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("UserRoles");
-                });
-
             modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -230,25 +218,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Permission.RoleEntity", "Role")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Auth.UserEntity", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Entities.UserGroup.UserGroupEntity", b =>
                 {
                     b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
@@ -273,15 +242,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("UserGroupRoles");
 
                     b.Navigation("UserGroups");
-
-                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.RoleEntity", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
