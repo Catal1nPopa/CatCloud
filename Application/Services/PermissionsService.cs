@@ -10,170 +10,72 @@ namespace Application.Services
         private readonly IPermissionsRepository _permissionsRepository = permissionsRepository;
         public async Task AddPermission(string permission)
         {
-            try
-            {
-                await _permissionsRepository.AddPermission(permission);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la adaugare permisiune noua {ex}");
-            }
+            await _permissionsRepository.AddPermission(permission);
         }
 
         public async Task AddRole(string roleName)
         {
-            try
-            {
-                await _permissionsRepository.AddRole(roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la adaugare rol nou {ex}");
-            }
+            await _permissionsRepository.AddRole(roleName);
         }
 
         public async Task AssignPermissionsToRole(string role, List<string> permisions)
         {
-            try
-            {
-                await _permissionsRepository.AssignPermissionsToRole(role, permisions);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la asignare permisiuni la un rol {ex}");
-            }
+            await _permissionsRepository.AssignPermissionsToRole(role, permisions);
         }
 
         public async Task AssignRoleToUser(Guid userId, string roleName)
         {
-            try
-            {
-                await _permissionsRepository.AssignRoleToUser(userId, roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la asignare rol pentru utilizator");
-            }
+            await _permissionsRepository.AssignRoleToUser(userId, roleName);
         }
 
         public async Task AssignRoleToUserInGroup(Guid userId, Guid groupId, string roleName)
         {
-            try
-            {
-                await _permissionsRepository.AssignRoleToUserInGroup(userId, groupId, roleName);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Eroare la asignare rol |{roleName}| utilizatorului |{userId}| in grupul |{groupId}|");
-            }
+            await _permissionsRepository.AssignRoleToUserInGroup(userId, groupId, roleName);
         }
 
         public async Task DeletePermission(string permission)
         {
-            try
-            {
-                await _permissionsRepository.DeletePermission(permission);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la stergere permisiune {ex}");
-            }
+            await _permissionsRepository.DeletePermission(permission);
         }
 
         public async Task DeleteRole(string roleName)
         {
-            try
-            {
-                await _permissionsRepository.DeleteRole(roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la stergere rol {ex}");
-            }
+            await _permissionsRepository.DeleteRole(roleName);
         }
 
         public async Task<List<string>> GetPermissions()
         {
-            try
-            {
-                return await _permissionsRepository.GetPermissions();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinere permisiuni {ex}");
-            }
+            return await _permissionsRepository.GetPermissions();
         }
 
         public async Task<List<string>> GetRolePermissions(string roleName)
         {
-            try
-            {
-                return await _permissionsRepository.GetRolePermissions(roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinerea permisiuni la un rol {ex}");
-            }
+            return await _permissionsRepository.GetRolePermissions(roleName);
         }
 
         public async Task<List<string>> GetRoles()
         {
-            try
-            {
-                return await _permissionsRepository.GetRoles();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinerea rolurilor {ex}");
-            }
+            return await _permissionsRepository.GetRoles();
         }
 
         public async Task<List<string>> GetUserRoles(Guid userId)
         {
-            try
-            {
-                return await _permissionsRepository.GetUserRoles(userId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinerea rolurilor utilizatorului {userId} - {ex}");
-            }
+            return await _permissionsRepository.GetUserRoles(userId);
         }
 
         public async Task<List<string>> GetUserRolesInGroup(Guid userId, Guid groupId)
         {
-            try
-            {
-                return await _permissionsRepository.GetUserRolesInGroup(userId, groupId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinerea rolurilor utilizatorului |{userId}| in grupul |{groupId}|");
-            }
+            return await _permissionsRepository.GetUserRolesInGroup(userId, groupId);
         }
 
         public async Task RemoveRoleFromUser(Guid userId, string roleName)
         {
-            try
-            {
-                await _permissionsRepository.RemoveRoleFromUser(userId, roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la stergerea rolului {roleName}, pentru utilizatorul {userId} - {ex}");
-            }
+            await _permissionsRepository.RemoveRoleFromUser(userId, roleName);
         }
 
         public async Task RemoveRoleFromUserInGroup(Guid userId, Guid groupId, string roleName)
         {
-            try
-            {
-                await _permissionsRepository.RemoveRoleFromUserInGroup(userId, groupId, roleName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la stergere rol |{roleName}| utilizatorului |{userId}| in grupul |{groupId}|");
-            }
+            await _permissionsRepository.RemoveRoleFromUserInGroup(userId, groupId, roleName);
         }
     }
 }

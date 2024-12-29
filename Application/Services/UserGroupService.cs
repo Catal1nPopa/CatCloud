@@ -13,90 +13,41 @@ namespace Application.Services
         private readonly IGroupRepository _groupRepository = groupRepository;
         public async Task CreateGroup(GroupDTO groupEntity)
         {
-            try
-            {
-                groupEntity.Created = DateTime.UtcNow;
-                await _groupRepository.CreateGroup(groupEntity.Adapt<GroupEntity>());
-                LoggerHelper.LogWarning($"Grup nou creat {groupEntity.Name}");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"{ex}");
-            }
+            groupEntity.Created = DateTime.UtcNow;
+            await _groupRepository.CreateGroup(groupEntity.Adapt<GroupEntity>());
+            LoggerHelper.LogWarning($"Grup nou creat {groupEntity.Name}");
         }
 
         public async Task DeleteGroup(Guid groupId)
         {
-            try
-            {
-                await _groupRepository.DeleteGroup(groupId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la stergere grup - {ex}");
-            }
+            await _groupRepository.DeleteGroup(groupId);
         }
 
         public async Task EditGroup(GroupDTO newGroupData)
         {
-            try
-            {
-                await _groupRepository.EditGroup(newGroupData.Adapt<GroupEntity>());
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la editare grup {ex}");
-            }
+            await _groupRepository.EditGroup(newGroupData.Adapt<GroupEntity>());
         }
 
         public async Task<List<UserInfoDTO>> GetGroupUsers(Guid groupId)
         {
-            try
-            {
-                var users = await _groupRepository.GetGroupUsers(groupId);
-                return users.Adapt<List<UserInfoDTO>>();
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Eroare la obtinere utilizatori pentru grupul {groupId}");
-            }
+            var users = await _groupRepository.GetGroupUsers(groupId);
+            return users.Adapt<List<UserInfoDTO>>();
         }
 
         public async Task<List<GroupDTO>> GetUserGroups(Guid userId)
         {
-            try
-            {
-                var groups = await _groupRepository.GetUserGroups(userId);
-                return groups.Adapt<List<GroupDTO>>();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la obtinere grupuri pentru user {userId}");
-            }
+            var groups = await _groupRepository.GetUserGroups(userId);
+            return groups.Adapt<List<GroupDTO>>();
         }
 
         public async Task LinkUserToGroup(UserToGroupDTO data)
         {
-            try
-            {
-                await _groupRepository.LinkUserToGroup(data.Adapt<LinkUserToGroupEntity>());
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Exceptie la adaugare utilizator in grup {ex}");
-            }
+            await _groupRepository.LinkUserToGroup(data.Adapt<LinkUserToGroupEntity>());
         }
 
         public async Task UnlinkUserFromGroup(UserToGroupDTO data)
         {
-            try
-            {
-                await _groupRepository.UnlinkUserFromGroup(data.Adapt<LinkUserToGroupEntity>());
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Eroare la eliminarea utilizatorului din grup: {ex.Message}");
-            }
+            await _groupRepository.UnlinkUserFromGroup(data.Adapt<LinkUserToGroupEntity>());
         }
     }
 }

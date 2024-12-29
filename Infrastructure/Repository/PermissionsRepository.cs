@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repository
@@ -45,6 +46,8 @@ namespace Infrastructure.Repository
                 _dbContext.Roles.Add(newRole);
                 await _dbContext.SaveChangesAsync();
             }
+            else
+                throw new ArgumentException($"Rolul dat deja a fost creat");
         }
 
         public async Task AssignPermissionsToRole(string roleName, List<string> permissions)
@@ -126,6 +129,8 @@ namespace Infrastructure.Repository
                 _dbContext.Roles.Remove(existingRole);
                 await _dbContext.SaveChangesAsync();
             }
+            else
+                throw new Exception($"Rolul {roleName} nu exista");
         }
 
         public async Task<List<string>> GetPermissions()

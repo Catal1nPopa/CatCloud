@@ -12,55 +12,77 @@ namespace CatCloud.Controllers
         [HttpPost("roles")]
         public async Task<IActionResult> AddRole([FromBody] string roleName)
         {
-            await _permissionsService.AddRole(roleName);
-            return Ok(new { Message = $"rol adaugat {roleName}"});
+                await _permissionsService.AddRole(roleName);
+                return Ok(new { Message = $"rol adaugat {roleName}" });
         }
 
         [HttpDelete("roles/{roleName}")]
         public async Task<IActionResult> DeleteRole(string roleName)
         {
-            await _permissionsService.DeleteRole(roleName);
-            return Ok();
+                await _permissionsService.DeleteRole(roleName);
+                return Ok();
         }
 
         [HttpGet("roles")]
         public async Task<ActionResult<List<string>>> GetRoles()
         {
-            return Ok(await _permissionsService.GetRoles());
+                return Ok(await _permissionsService.GetRoles());
         }
 
         [HttpPost("permissions")]
         public async Task<IActionResult> AddPermission([FromBody] string permission)
         {
-            await _permissionsService.AddPermission(permission);
-            return Ok();
+                await _permissionsService.AddPermission(permission);
+                return Ok(new { Message = $"Permisiune {permission} adaugata"});
         }
 
         [HttpDelete("permissions/{permission}")]
         public async Task<IActionResult> DeletePermission(string permission)
         {
-            await _permissionsService.DeletePermission(permission);
-            return Ok();
+                await _permissionsService.DeletePermission(permission);
+                return Ok(new { Message = $"Permisiune {permission} stearsa" });
         }
 
         [HttpGet("permissions")]
         public async Task<ActionResult<List<string>>> GetPermissions()
         {
-            return Ok(await _permissionsService.GetPermissions());
+            try
+            {
+                return Ok(await _permissionsService.GetPermissions());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("roles/{roleName}/permissions")]
         public async Task<IActionResult> AssignPermissionsToRole(string roleName, [FromBody] List<string> permissions)
         {
-            await _permissionsService.AssignPermissionsToRole(roleName, permissions);
-            return Ok(new { Message = $"Permisiunile au fost asignate rolului '{roleName}'." });
+            try
+            {
+                await _permissionsService.AssignPermissionsToRole(roleName, permissions);
+                return Ok(new { Message = $"Permisiunile au fost asignate rolului '{roleName}'." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("roles/{roleName}/permissions")]
         public async Task<ActionResult<List<string>>> GetRolePermissions(string roleName)
         {
-            var permissions = await _permissionsService.GetRolePermissions(roleName);
-            return Ok(permissions);
+            try
+            {
+
+                var permissions = await _permissionsService.GetRolePermissions(roleName);
+                return Ok(permissions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("users/{userId}/roles")]
@@ -80,15 +102,29 @@ namespace CatCloud.Controllers
         [HttpGet("users/{userId}/roles")]
         public async Task<ActionResult<List<string>>> GetUserRoles(Guid userId)
         {
-            var roles = await _permissionsService.GetUserRoles(userId);
-            return Ok(roles);
+            try
+            {
+                var roles = await _permissionsService.GetUserRoles(userId);
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
         }
 
         [HttpDelete("users/{userId}/roles/{roleName}")]
         public async Task<IActionResult> RemoveRoleFromUser(Guid userId, string roleName)
         {
-            await _permissionsService.RemoveRoleFromUser(userId, roleName);
-            return Ok(new { Message = $"Rolul '{roleName}' a fost eliminat." });
+            try
+            {
+                await _permissionsService.RemoveRoleFromUser(userId, roleName);
+                return Ok(new { Message = $"Rolul '{roleName}' a fost eliminat." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         [HttpPost("groups/{groupId}/users/{userId}/roles")]
@@ -122,8 +158,15 @@ namespace CatCloud.Controllers
         [HttpGet("groups/{groupId}/users/{userId}/roles")]
         public async Task<ActionResult<List<string>>> GetUserRolesInGroup(Guid groupId, Guid userId)
         {
-            var roles = await _permissionsService.GetUserRolesInGroup(userId, groupId);
-            return Ok(roles);
+            try
+            {
+                var roles = await _permissionsService.GetUserRolesInGroup(userId, groupId);
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
         }
     }
 }
