@@ -141,42 +141,36 @@ namespace CatCloud.Controllers
             try
             {
                 var files = await _filesService.GetFilesSharedWithGroup(groupId);
-                
+                if (files == null || !files.Any())
+                {
+                    return NotFound("Nu au fost găsite fișiere pentru acest utilizator.");
+                }
+
+                var memoryStream = new MemoryStream();
+
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var fileRecord in files)
+                    {
+                        if (fileRecord.File != null)
+                        {
+                            var zipEntry = archive.CreateEntry(fileRecord.FileName, CompressionLevel.Fastest);
+
+                            using (var entryStream = zipEntry.Open())
+                            using (var fileStream = fileRecord.File.OpenReadStream())
+                            {
+                                await fileStream.CopyToAsync(entryStream);
+                            }
+                        }
+                    }
+                }
+                memoryStream.Position = 0;
                 return File(memoryStream, "application/zip", $"Group_{groupId}_Files.zip");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-        }
-
-        private async Task<MemoryStream> GetFiles(List<GetFilesDTO> files)
-        {
-            if (files == null || !files.Any())
-            {
-                return null;
-            }
-
-            var memoryStream = new MemoryStream();
-
-            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-            {
-                foreach (var fileRecord in files)
-                {
-                    if (fileRecord.File != null)
-                    {
-                        var zipEntry = archive.CreateEntry(fileRecord.FileName, CompressionLevel.Fastest);
-
-                        using (var entryStream = zipEntry.Open())
-                        using (var fileStream = fileRecord.File.OpenReadStream())
-                        {
-                            await fileStream.CopyToAsync(entryStream);
-                        }
-                    }
-                }
-            }
-            memoryStream.Position = 0;
-            return memoryStream;
         }
     }
 }
