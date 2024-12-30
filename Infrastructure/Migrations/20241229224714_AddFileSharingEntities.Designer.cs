@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    partial class CloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241229224714_AddFileSharingEntities")]
+    partial class AddFileSharingEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,7 +91,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UploadedByUserId");
 
-                    b.ToTable("Files");
+                    b.ToTable("FileEntity");
                 });
 
             modelBuilder.Entity("Domain.Entities.Files.FileGroupShareEntity", b =>
@@ -106,7 +109,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("FileGroupShares");
+                    b.ToTable("FileGroupShareEntity");
                 });
 
             modelBuilder.Entity("Domain.Entities.Files.FileUserShareEntity", b =>
@@ -124,7 +127,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("FileUserShares");
+                    b.ToTable("FileUserShareEntity");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.PermissionEntity", b =>

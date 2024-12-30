@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs.Storage;
+using Application.Interfaces;
 using Application.Services;
 using Helper.Configuration;
 using Infrastructure.Configuration;
@@ -15,6 +16,8 @@ namespace Application.Configuration
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserGroupService, UserGroupService>();
             services.AddScoped<IPermissionsService, PermissionsService>();
+            services.AddScoped<IFilesService, FileService>();
+            services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
             services.AddInfrastructure();
             return services;
         }
