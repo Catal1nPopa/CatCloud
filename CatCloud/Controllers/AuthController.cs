@@ -15,7 +15,13 @@ namespace CatCloud.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserCredentialsModel userCredentials)
         {
-            return await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
+            var token = await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
+            if (string.IsNullOrEmpty(token))
+            {
+                return Unauthorized(new { message = "Autentificare eșuată. Verifică credentialele." });
+            }
+
+            return Ok(new { token = token });
         }
 
         [HttpPost("createUser")]

@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         Task<List<FileEntity>> GetUserFiles(Guid userId);
         Task<List<FileEntity>> GetFilesSharedWithUser(Guid userId);
         Task<List<FileEntity>> GetFilesSharedWithGroup(Guid groupId);
+        Task<FileEntity> GetFileById(Guid fileId, Guid AuthorId);
     }
 }

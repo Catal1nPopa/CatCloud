@@ -17,5 +17,6 @@ namespace Application.Interfaces
         Task DeleteFile(Guid fileId, Guid userId);
         Task ShareFileWithUsers(Guid fileId, List<Guid> userIds);
         Task ShareFileWithGroups(Guid fileId, List<Guid> groupIds);
+        Task CopyFile(CopyFileDTO fileDTO);
     }
 }
