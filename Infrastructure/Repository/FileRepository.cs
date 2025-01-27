@@ -82,6 +82,7 @@ namespace Infrastructure.Repository
                 throw new Exception($"Eroare la obtinerea fisierelor pentru utilizatorul: {userId}");
             }
         }
+
         public async Task<List<FileEntity>> GetFilesSharedWithUser(Guid userId)
         {
             try
@@ -124,29 +125,40 @@ namespace Infrastructure.Repository
             }
         }
 
-
         public async Task DeleteFile(Guid fileId, Guid userId)
         {
             try
             {
 
-            var file = await _cloudDbContext.Files.FirstOrDefaultAsync(f => f.Id == fileId && f.UploadedByUserId == userId);
-            if (file == null) throw new FileNotFoundException("File not found or unauthorized.");
+                var file = await _cloudDbContext.Files.FirstOrDefaultAsync(f => f.Id == fileId && f.UploadedByUserId == userId);
+                if (file == null) throw new FileNotFoundException("File not found or unauthorized.");
 
-            if (File.Exists(file.FilePath))
-            {
-                File.Delete(file.FilePath);
+                if (File.Exists(file.FilePath))
+                {
+                    File.Delete(file.FilePath);
+                }
+
+                _cloudDbContext.Files.Remove(file);
+                _cloudDbContext.FileUserShares.RemoveRange(_cloudDbContext.FileUserShares.Where(fu => fu.FileId == fileId));
+                _cloudDbContext.FileGroupShares.RemoveRange(_cloudDbContext.FileGroupShares.Where(fg => fg.FileId == fileId));
+
+                await _cloudDbContext.SaveChangesAsync();
             }
-
-            _cloudDbContext.Files.Remove(file);
-            _cloudDbContext.FileUserShares.RemoveRange(_cloudDbContext.FileUserShares.Where(fu => fu.FileId == fileId));
-            _cloudDbContext.FileGroupShares.RemoveRange(_cloudDbContext.FileGroupShares.Where(fg => fg.FileId == fileId));
-
-            await _cloudDbContext.SaveChangesAsync();
-            }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Eroare la sterge fisier {fileId} de catre utilizatorul {userId}");
+            }
+        }
+
+        public async Task<FileEntity> GetFileById(Guid fileId, Guid authorId)
+        {
+            try
+            {
+                return await _cloudDbContext.Files.FirstOrDefaultAsync(id => id.Id == fileId && id.UploadedByUserId == authorId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Fisierul nu a fost gasit");
             }
         }
     }

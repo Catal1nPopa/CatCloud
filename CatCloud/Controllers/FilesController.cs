@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using CatCloud.Models.File;
 using Mapster;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 
@@ -166,6 +165,20 @@ namespace CatCloud.Controllers
                 }
                 memoryStream.Position = 0;
                 return File(memoryStream, "application/zip", $"Group_{groupId}_Files.zip");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("copyFile")]
+        public async Task<IActionResult> CopyFile([FromBody] CopyFileModel fileModel)
+        {
+            try
+            {
+                await _filesService.CopyFile(fileModel.Adapt<CopyFileDTO>());
+                return Ok();
             }
             catch (Exception ex)
             {

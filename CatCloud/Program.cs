@@ -5,6 +5,16 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ApplicationInjection(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()  
+              .AllowAnyMethod(); 
+    });
+});
+
 try
 {
     Log.Information("Aplicatia se porneste...");
@@ -24,6 +34,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseCors("AllowSpecificOrigins");
     app.UseAuthorization();
     app.MapControllers();
 

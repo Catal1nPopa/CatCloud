@@ -52,7 +52,25 @@ namespace Infrastructure.Repository
                 LoggerHelper.LogInformation($"Eroare la obtinerea utilizator - {username}, exception - {exception}");
                 throw new ApplicationException($"Eroare la obtinerea utilizator : {username}");
             }
+        }
 
+        public async Task<UserEntity> GetUserById(Guid userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == userId);
+                return user;
+            }
+            catch (NpgsqlException exception)
+            {
+                LoggerHelper.LogInformation($"Eroare la obtinerea din baza de date a utilizatorului - {userId}, exception - {exception}");
+                throw new InvalidOperationException($"Eroare la obtinerea din baza de date a utilizatorului : {userId}", exception);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.LogInformation($"Eroare la obtinerea utilizator - {userId}, exception - {exception}");
+                throw new ApplicationException($"Eroare la obtinerea utilizator : {userId}");
+            }
         }
     }
 }

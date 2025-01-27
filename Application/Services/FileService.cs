@@ -12,18 +12,20 @@ using Microsoft.Extensions.Options;
 namespace Application.Services
 {
     public class FileService(IFileRepository fileRepository,
+        IAuthRepository authRepository,
         IOptions<StorageSettings> storageSettings,
         IConfiguration configuration) : IFilesService
     {
         private readonly IFileRepository _fileRepository = fileRepository;
         private readonly IOptions<StorageSettings> _storageSettings = storageSettings;
         private readonly IConfiguration _configuration = configuration;
+        private readonly IAuthRepository _authRepository = authRepository;
 
         public async Task UploadFiles(IFormFile file, FilesDTO filesDTO)
         {
             var storagePath = GetStoragePath(filesDTO.FileSize);
             var userFolderPath = Path.Combine(storagePath, "files", filesDTO.UploadedByUserId.ToString());
-            if(!File.Exists(userFolderPath))
+            if (!File.Exists(userFolderPath))
             {
                 Directory.CreateDirectory(userFolderPath);
             }
@@ -48,10 +50,36 @@ namespace Application.Services
             return files;
         }
 
+        public async Task CopyFile(CopyFileDTO fileDTO)
+        {
+            var fileData = await _fileRepository.GetFileById(fileDTO.fileId, fileDTO.AuthorId);
+            var fileEntity = fileData;
+            var fileRecord = new GetFilesDTO { };
+            if (File.Exists(fileData.FilePath))
+            {
+                FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
+                byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath);
+                var memoryStream = new MemoryStream(decryptedBytes);
+
+                fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream"
+                };
+            }
+
+            var user = await _authRepository.GetUserById(fileDTO.UserId);
+            fileEntity.UploadedByUser = user;
+            fileEntity.UploadedByUserId = fileDTO.UserId;
+            fileEntity.UploadedAt = DateTime.UtcNow;
+
+            await UploadFiles(fileRecord.File, fileEntity.Adapt<FilesDTO>());
+        }
+
         public async Task<List<GetFilesDTO>> GetFilesSharedWithGroup(Guid groupId)
         {
             var groupFilesPath = await _fileRepository.GetFilesSharedWithGroup(groupId);
-            var files = await GetDecryptedFiles(groupFilesPath); 
+            var files = await GetDecryptedFiles(groupFilesPath);
             return files;
         }
         public async Task<List<GetFilesDTO>> GetFilesSharedWithUser(Guid userId)
@@ -94,7 +122,6 @@ namespace Application.Services
         {
             try
             {
-
                 foreach (var driveLetter in _storageSettings.Value.Storages)
                 {
                     var driveInfo = new DriveInfo(driveLetter);
