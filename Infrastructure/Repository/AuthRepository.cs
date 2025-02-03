@@ -26,12 +26,12 @@ namespace Infrastructure.Repository
             catch (NpgsqlException exception)
             {
                 LoggerHelper.LogInformation($"A aparut o eroare la adaugarea utilizatorului in baza de date - {exception}");
-                throw new InvalidOperationException("A aparut o eroare la adaugarea utilizatorului in baza de date.", exception);
+                throw new InvalidOperationException(exception.Message);
             }
             catch (Exception exception)
             {
                 LoggerHelper.LogInformation($"A aparut o eroare la adaugare utilizator - {exception}");
-                throw new ApplicationException("A aparut o eroare la adaugare utilizator.", exception);
+                throw new ApplicationException(exception.Message);
             }
         }
 

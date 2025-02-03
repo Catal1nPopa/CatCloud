@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using CatCloud.Models.User;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatCloud.Controllers
@@ -20,18 +21,25 @@ namespace CatCloud.Controllers
             {
                 return Unauthorized(new { message = "Autentificare eșuată. Verifică credentialele." });
             }
-
             return Ok(new { token = token });
         }
 
+        [Authorize]
         [HttpPost("createUser")]
         public async Task<IActionResult> CreateUser(UserModel userData)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest();
 
-            await _authService.CreateUser(userData.Adapt<UserDTO>());
-            return Created();
+                await _authService.CreateUser(userData.Adapt<UserDTO>());
+                return Ok("Utilizator creat");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
