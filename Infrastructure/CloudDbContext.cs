@@ -17,7 +17,7 @@ namespace Infrastructure
         public DbSet<UserGroupRoleEntity> UserGroupRoles { get; set; }
         public DbSet<UserRoleEntity> UserRoles { get; set; }
         public DbSet<FileEntity> Files { get; set; }
-        public DbSet<FileUserShareEntity>  FileUserShares { get; set; }
+        public DbSet<FileUserShareEntity> FileUserShares { get; set; }
         public DbSet<FileGroupShareEntity> FileGroupShares { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -99,7 +99,7 @@ namespace Infrastructure
 
             modelBuilder.Entity<FileUserShareEntity>()
                 .HasOne(fu => fu.User)
-                .WithMany(u => u.SharedFiles)
+                .WithMany()
                 .HasForeignKey(fu => fu.UserId);
 
             // Configurare pentru partajarea fisierului cu grupuri
@@ -113,7 +113,7 @@ namespace Infrastructure
 
             modelBuilder.Entity<FileGroupShareEntity>()
                 .HasOne(fg => fg.Group)
-                .WithMany(g => g.SharedFiles)
+                .WithMany()
                 .HasForeignKey(fg => fg.GroupId);
 
             modelBuilder.Entity<FileEntity>()

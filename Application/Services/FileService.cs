@@ -152,5 +152,16 @@ namespace Application.Services
         {
             await _fileRepository.ShareFileWithGroups(fileId, groupIds);
         }
+
+        public async Task<List<FilesMetadataDTO>> GetUserFilesMetadata(Guid userId)
+        {
+            var files = await _fileRepository.GetUserFilesMetadata(userId);
+            return files.Adapt<List<FilesMetadataDTO>>();
+        }
+
+        public Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -2,11 +2,6 @@
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
@@ -160,6 +155,40 @@ namespace Infrastructure.Repository
             {
                 throw new Exception($"Fisierul nu a fost gasit");
             }
+        }
+
+        public async Task<List<FilesMetadataEntity>> GetUserFilesMetadata(Guid userId)
+        {
+            var res = await _cloudDbContext.Files
+            .Where(f => f.UploadedByUserId == userId)
+            .Include(f => f.UploadedByUser)
+            .Include(f => f.SharedWithUsers).ThenInclude(f => f.User)
+            .Include(f => f.SharedWithGroups).ThenInclude(swu => swu.Group)
+            .Select(f => new FilesMetadataEntity
+            {
+                Id = f.Id,
+                FileName = f.FileName,
+                FileSize = f.FileSize,
+                UploadedAt = f.UploadedAt,
+                SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
+                SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
+            })
+            .ToListAsync();
+
+            return res;
+        }
+
+        public async Task<List<FilesMetadataEntity>> GetUserGroupFilesMetadata(Guid userId)
+        {
+            var res = await _cloudDbContext.Files
+            .Where(f => f.UploadedByUserId == userId)
+            .Include(f => f.UploadedByUser)
+            .Include(f => f.SharedWithUsers)
+            .Include(f => f.SharedWithGroups)
+            .ToListAsync();
+
+            List<FilesMetadataEntity> resEntity = new List<FilesMetadataEntity>();
+            return resEntity;
         }
     }
 }

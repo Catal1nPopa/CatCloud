@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    partial class CloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250206135409_FixJoin")]
+    partial class FixJoin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,15 +102,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("GroupEntityId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("SharedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("FileId", "GroupId");
-
-                    b.HasIndex("GroupEntityId");
 
                     b.HasIndex("GroupId");
 
@@ -279,12 +277,8 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", null)
-                        .WithMany("SharedFiles")
-                        .HasForeignKey("GroupEntityId");
-
                     b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
-                        .WithMany()
+                        .WithMany("SharedFiles")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
