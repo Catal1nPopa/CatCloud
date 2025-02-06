@@ -185,5 +185,12 @@ namespace CatCloud.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("userFilesMetadata")]
+        public async Task<ActionResult<List<FileMetadata>>> GetUserFileMetadata(Guid userId)
+        {
+            var result = await _filesService.GetUserFilesMetadata(userId);
+            return result.Adapt<List<FileMetadata>>();
+        }
     }
 }

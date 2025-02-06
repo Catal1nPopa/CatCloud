@@ -1,4 +1,5 @@
 using Application.Configuration;
+using Application.Configuration.ExceptionConfig;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -51,6 +52,7 @@ try
 
     var app = builder.Build();
 
+    app.UseMiddleware<ErrorHandlingMiddleware>();
     if (app.Environment.IsDevelopment())
     {
         app.MapScalarApiReference();

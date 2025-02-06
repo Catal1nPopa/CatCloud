@@ -1,10 +1,5 @@
 ﻿using Application.DTOs.Files;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
@@ -18,5 +13,7 @@ namespace Application.Interfaces
         Task ShareFileWithUsers(Guid fileId, List<Guid> userIds);
         Task ShareFileWithGroups(Guid fileId, List<Guid> groupIds);
         Task CopyFile(CopyFileDTO fileDTO);
+        Task<List<FilesMetadataDTO>> GetUserFilesMetadata(Guid userId);
+        Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId);
     }
 }

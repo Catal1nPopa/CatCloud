@@ -1,9 +1,4 @@
 ﻿using Domain.Entities.Files;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
@@ -17,5 +12,7 @@ namespace Domain.Interfaces
         Task<List<FileEntity>> GetFilesSharedWithUser(Guid userId);
         Task<List<FileEntity>> GetFilesSharedWithGroup(Guid groupId);
         Task<FileEntity> GetFileById(Guid fileId, Guid AuthorId);
+        Task<List<FilesMetadataEntity>> GetUserFilesMetadata(Guid userId);
+        Task<List<FilesMetadataEntity>> GetUserGroupFilesMetadata(Guid userId);
     }
 }

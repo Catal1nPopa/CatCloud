@@ -17,11 +17,8 @@ namespace CatCloud.Controllers
         public async Task<ActionResult<string>> Login(UserCredentialsModel userCredentials)
         {
             var token = await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
-            if (string.IsNullOrEmpty(token))
-            {
-                return Unauthorized(new { message = "Autentificare eșuată. Verifică credentialele." });
-            }
-            return Ok(new { token = token });
+            if (token != null) { return Ok(new { token = token }); }
+            return BadRequest(new { message = "Credentiale invalide " });
         }
 
         [Authorize]
