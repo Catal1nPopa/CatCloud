@@ -13,7 +13,7 @@ namespace Application.Interfaces
         Task ShareFileWithUsers(Guid fileId, List<Guid> userIds);
         Task ShareFileWithGroups(Guid fileId, List<Guid> groupIds);
         Task CopyFile(CopyFileDTO fileDTO);
-        Task<List<FilesMetadataDTO>> GetUserFilesMetadata(Guid userId);
-        Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId);
+        Task<List<FilesMetadataDTO>> GetUserFilesMetadata();
+        //Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId);
     }
 }

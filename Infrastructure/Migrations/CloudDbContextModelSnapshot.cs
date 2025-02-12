@@ -67,6 +67,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -86,8 +90,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UploadedByUserId");
-
                     b.ToTable("Files");
                 });
 
@@ -99,15 +101,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("GroupEntityId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("SharedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("FileId", "GroupId");
-
-                    b.HasIndex("GroupEntityId");
 
                     b.HasIndex("GroupId");
 
@@ -125,12 +122,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("SharedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("UserEntityId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("FileId", "UserId");
-
-                    b.HasIndex("UserEntityId");
 
                     b.HasIndex("UserId");
 
@@ -260,17 +252,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserGroups");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Auth.UserEntity", "UploadedByUser")
-                        .WithMany("UploadedFiles")
-                        .HasForeignKey("UploadedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UploadedByUser");
-                });
-
             modelBuilder.Entity("Domain.Entities.Files.FileGroupShareEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Files.FileEntity", "File")
@@ -279,12 +260,8 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", null)
-                        .WithMany("SharedFiles")
-                        .HasForeignKey("GroupEntityId");
-
                     b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
-                        .WithMany()
+                        .WithMany("SharedFiles")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -302,12 +279,8 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Auth.UserEntity", null)
-                        .WithMany("SharedFiles")
-                        .HasForeignKey("UserEntityId");
-
                     b.HasOne("Domain.Entities.Auth.UserEntity", "User")
-                        .WithMany()
+                        .WithMany("SharedFiles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -404,8 +377,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
                     b.Navigation("SharedFiles");
-
-                    b.Navigation("UploadedFiles");
 
                     b.Navigation("UserGroupRoles");
 

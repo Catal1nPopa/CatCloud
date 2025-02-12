@@ -27,8 +27,10 @@ namespace Infrastructure.Repository
 
         public async Task ShareFileWithUsers(Guid fileId, List<Guid> userIds)
         {
+            var file = await _cloudDbContext.Files.FindAsync(fileId);
             foreach (var userId in userIds)
             {
+                var user = await _cloudDbContext.Users.FindAsync(userId);
                 var exists = await _cloudDbContext.FileUserShares.AnyAsync(fu => fu.FileId == fileId && fu.UserId == userId);
                 if (!exists)
                 {
@@ -36,7 +38,9 @@ namespace Infrastructure.Repository
                     {
                         FileId = fileId,
                         UserId = userId,
-                        SharedAt = DateTime.UtcNow
+                        SharedAt = DateTime.UtcNow,
+                        File = file,
+                        User = user
                     };
                     _cloudDbContext.FileUserShares.Add(userShare);
                 }
@@ -46,8 +50,10 @@ namespace Infrastructure.Repository
 
         public async Task ShareFileWithGroups(Guid fileId, List<Guid> groupIds)
         {
+            var file = await _cloudDbContext.Files.FindAsync(fileId);
             foreach (var groupId in groupIds)
             {
+                var group = await _cloudDbContext.Groups.FindAsync(groupId);
                 var exists = await _cloudDbContext.FileGroupShares.AnyAsync(fg => fg.FileId == fileId && fg.GroupId == groupId);
                 if (!exists)
                 {
@@ -55,13 +61,17 @@ namespace Infrastructure.Repository
                     {
                         FileId = fileId,
                         GroupId = groupId,
-                        SharedAt = DateTime.UtcNow
+                        SharedAt = DateTime.UtcNow,
+                        File = file,
+                        Group = group
+
                     };
                     _cloudDbContext.FileGroupShares.Add(groupShare);
                 }
             }
 
             await _cloudDbContext.SaveChangesAsync();
+            //throw new NotImplementedException();
         }
 
         public async Task<List<FileEntity>> GetUserFiles(Guid userId)
@@ -101,23 +111,24 @@ namespace Infrastructure.Repository
 
         public async Task<List<FileEntity>> GetFilesSharedWithGroup(Guid groupId)
         {
-            try
-            {
-                var fileIds = await _cloudDbContext.FileGroupShares
-                    .Where(fg => fg.GroupId == groupId)
-                    .Select(fg => fg.FileId)
-                    .ToListAsync();
+            //try
+            //{
+            //    var fileIds = await _cloudDbContext.FileGroupShares
+            //        .Where(fg => fg.GroupId == groupId)
+            //        .Select(fg => fg.FileId)
+            //        .ToListAsync();
 
-                var files = await _cloudDbContext.Files
-                    .Where(f => fileIds.Contains(f.Id))
-                    .ToListAsync();
+            //    var files = await _cloudDbContext.Files
+            //        .Where(f => fileIds.Contains(f.Id))
+            //        .ToListAsync();
 
-                return files;
-            }
-            catch
-            {
-                throw new Exception($"Eroare la obtinerea fisierelor partajate pentru grupul: {groupId}");
-            }
+            //    return files;
+            //}
+            //catch
+            //{
+            //    throw new Exception($"Eroare la obtinerea fisierelor partajate pentru grupul: {groupId}");
+            //}
+            throw new NotImplementedException();
         }
 
         public async Task DeleteFile(Guid fileId, Guid userId)
@@ -135,7 +146,7 @@ namespace Infrastructure.Repository
 
                 _cloudDbContext.Files.Remove(file);
                 _cloudDbContext.FileUserShares.RemoveRange(_cloudDbContext.FileUserShares.Where(fu => fu.FileId == fileId));
-                _cloudDbContext.FileGroupShares.RemoveRange(_cloudDbContext.FileGroupShares.Where(fg => fg.FileId == fileId));
+                //_cloudDbContext.FileGroupShares.RemoveRange(_cloudDbContext.FileGroupShares.Where(fg => fg.FileId == fileId));
 
                 await _cloudDbContext.SaveChangesAsync();
             }
@@ -161,7 +172,7 @@ namespace Infrastructure.Repository
         {
             var res = await _cloudDbContext.Files
             .Where(f => f.UploadedByUserId == userId)
-            .Include(f => f.UploadedByUser)
+            .Include(f => f.UserEntities)
             .Include(f => f.SharedWithUsers).ThenInclude(f => f.User)
             .Include(f => f.SharedWithGroups).ThenInclude(swu => swu.Group)
             .Select(f => new FilesMetadataEntity
@@ -170,6 +181,7 @@ namespace Infrastructure.Repository
                 FileName = f.FileName,
                 FileSize = f.FileSize,
                 UploadedAt = f.UploadedAt,
+                ContentType = f.ContentType,
                 SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
                 SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
             })
@@ -182,9 +194,10 @@ namespace Infrastructure.Repository
         {
             var res = await _cloudDbContext.Files
             .Where(f => f.UploadedByUserId == userId)
-            .Include(f => f.UploadedByUser)
+            .Include(f => f.UserEntities)
             .Include(f => f.SharedWithUsers)
             .Include(f => f.SharedWithGroups)
+            //.Include(f => f.SharedWithGroups)
             .ToListAsync();
 
             List<FilesMetadataEntity> resEntity = new List<FilesMetadataEntity>();

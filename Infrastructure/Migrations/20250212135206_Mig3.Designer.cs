@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    [Migration("20241230183341_AddFileSharingEntitiess")]
-    partial class AddFileSharingEntitiess
+    [Migration("20250212135206_Mig3")]
+    partial class Mig3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,6 +70,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -88,8 +92,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UploadedByUserId");
 
                     b.ToTable("Files");
                 });
@@ -253,17 +255,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserGroups");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Auth.UserEntity", "UploadedByUser")
-                        .WithMany("UploadedFiles")
-                        .HasForeignKey("UploadedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UploadedByUser");
-                });
-
             modelBuilder.Entity("Domain.Entities.Files.FileGroupShareEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Files.FileEntity", "File")
@@ -389,8 +380,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
                     b.Navigation("SharedFiles");
-
-                    b.Navigation("UploadedFiles");
 
                     b.Navigation("UserGroupRoles");
 

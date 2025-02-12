@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    [Migration("20241227100802_AddUserRoleConection")]
-    partial class AddUserRoleConection
+    [Migration("20250212133544_Mig2")]
+    partial class Mig2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,56 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Files");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Files.FileUserShareEntity", b =>
+                {
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SharedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("FileId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FileUserShares");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.PermissionEntity", b =>
@@ -141,7 +191,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoleEntity");
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
@@ -185,6 +235,25 @@ namespace Infrastructure.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("UserGroups");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Files.FileUserShareEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Files.FileEntity", "File")
+                        .WithMany("SharedWithUsers")
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Auth.UserEntity", "User")
+                        .WithMany("SharedFiles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("File");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.RolePermissionEntity", b =>
@@ -273,11 +342,18 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
+                    b.Navigation("SharedFiles");
+
                     b.Navigation("UserGroupRoles");
 
                     b.Navigation("UserGroups");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
+                {
+                    b.Navigation("SharedWithUsers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.RoleEntity", b =>

@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using CatCloud.Models.User;
 using Mapster;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatCloud.Controllers
@@ -21,7 +20,7 @@ namespace CatCloud.Controllers
             return BadRequest(new { message = "Credentiale invalide " });
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("createUser")]
         public async Task<IActionResult> CreateUser(UserModel userData)
         {

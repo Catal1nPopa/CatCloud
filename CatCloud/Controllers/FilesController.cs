@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using CatCloud.Models.File;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 
@@ -19,7 +20,7 @@ namespace CatCloud.Controllers
             try
             {
                 var fileMetadata = new FileUploadModel(
-                    userFile.FileName, DateTime.UtcNow, userFile.Length, userId);
+                    userFile.FileName, DateTime.UtcNow, userFile.Length, userId, userFile.ContentType);
                 await _filesService.UploadFiles(userFile, fileMetadata.Adapt<FilesDTO>());
                 return Ok(new { Message = $"Fisierul {userFile.FileName} incarcat cu succes" });
             }
@@ -186,11 +187,25 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("userFilesMetadata")]
-        public async Task<ActionResult<List<FileMetadata>>> GetUserFileMetadata(Guid userId)
+        public async Task<ActionResult<List<FileMetadata>>> GetUserFileMetadata()
         {
-            var result = await _filesService.GetUserFilesMetadata(userId);
-            return result.Adapt<List<FileMetadata>>();
+            try
+            {
+                var result = await _filesService.GetUserFilesMetadata();
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
+        //[HttpGet("userGroupFilesMetadata")]
+        //public async Task<ActionResult<List<>>> UserGroupFilesMetadata(Guid userId)
+        //{
+
+        //}
     }
 }
