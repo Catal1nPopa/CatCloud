@@ -14,12 +14,14 @@ namespace Application.Services
     public class FileService(IFileRepository fileRepository,
         IAuthRepository authRepository,
         IOptions<StorageSettings> storageSettings,
-        IConfiguration configuration) : IFilesService
+        IConfiguration configuration,
+        IUserProvider userProvider) : IFilesService
     {
         private readonly IFileRepository _fileRepository = fileRepository;
         private readonly IOptions<StorageSettings> _storageSettings = storageSettings;
         private readonly IConfiguration _configuration = configuration;
         private readonly IAuthRepository _authRepository = authRepository;
+        private readonly IUserProvider _userProvider = userProvider;
 
         public async Task UploadFiles(IFormFile file, FilesDTO filesDTO)
         {
@@ -69,7 +71,7 @@ namespace Application.Services
             }
 
             var user = await _authRepository.GetUserById(fileDTO.UserId);
-            fileEntity.UploadedByUser = user;
+            //fileEntity.UploadedByUser = user;
             fileEntity.UploadedByUserId = fileDTO.UserId;
             fileEntity.UploadedAt = DateTime.UtcNow;
 
@@ -153,15 +155,18 @@ namespace Application.Services
             await _fileRepository.ShareFileWithGroups(fileId, groupIds);
         }
 
-        public async Task<List<FilesMetadataDTO>> GetUserFilesMetadata(Guid userId)
+        public async Task<List<FilesMetadataDTO>> GetUserFilesMetadata()
         {
+            var userId = _userProvider.GetUserId();
             var files = await _fileRepository.GetUserFilesMetadata(userId);
             return files.Adapt<List<FilesMetadataDTO>>();
         }
 
-        public Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
+        //public async Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)
+        //{
+        //    var userId = _userProvider.GetUserId();
+        //    var files = await _fileRepository.GetUserGroupFilesMetadata(userId);
+        //    return files.Adapt<List<>>();
+        //}
     }
 }

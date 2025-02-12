@@ -6,13 +6,15 @@
         public DateTime UploadedAt { get; set; }
         public long FileSize { get; set; }
         public Guid UploadedByUserId { get; set; }
+        public string ContentType { get; set; }
 
-        public FileUploadModel(string name, DateTime uploaded, long fileSize, Guid userId)
+        public FileUploadModel(string name, DateTime uploaded, long fileSize, Guid userId, string contentType)
         {
             FileName = name;
             UploadedAt = uploaded;
             FileSize = fileSize;
             UploadedByUserId = userId;
+            ContentType = contentType;
         }
     }
 }

@@ -89,37 +89,48 @@ namespace Infrastructure
                 .HasForeignKey(ur => ur.RoleId);
 
             // Configurare pentru partajarea fisierului cu utilizatori
-            modelBuilder.Entity<FileUserShareEntity>()
-                .HasKey(fu => new { fu.FileId, fu.UserId });
+            //modelBuilder.Entity<FileUserShareEntity>()
+            //    .HasKey(fu => new { fu.FileId, fu.UserId });
 
-            modelBuilder.Entity<FileUserShareEntity>()
-                .HasOne(fu => fu.File)
-                .WithMany(f => f.SharedWithUsers)
-                .HasForeignKey(fu => fu.FileId);
+            //modelBuilder.Entity<FileUserShareEntity>()
+            //    .HasOne(fu => fu.File)
+            //    .WithMany(f => f.SharedWithUsers)
+            //    .HasForeignKey(fu => fu.FileId);
 
-            modelBuilder.Entity<FileUserShareEntity>()
-                .HasOne(fu => fu.User)
-                .WithMany()
-                .HasForeignKey(fu => fu.UserId);
+            //modelBuilder.Entity<FileUserShareEntity>()
+            //    .HasOne(fu => fu.User)
+            //    .WithMany()
+            //    .HasForeignKey(fu => fu.UserId);
 
             // Configurare pentru partajarea fisierului cu grupuri
-            modelBuilder.Entity<FileGroupShareEntity>()
-                .HasKey(fg => new { fg.FileId, fg.GroupId });
+            //modelBuilder.Entity<FileGroupShareEntity>()
+            //    .HasKey(fg => new { fg.FileId, fg.GroupId });
 
-            modelBuilder.Entity<FileGroupShareEntity>()
-                .HasOne(fg => fg.File)
-                .WithMany(f => f.SharedWithGroups)
-                .HasForeignKey(fg => fg.FileId);
+            //modelBuilder.Entity<FileGroupShareEntity>()
+            //    .HasOne(fg => fg.File)
+            //    .WithMany(f => f.SharedWithGroups)
+            //    .HasForeignKey(fg => fg.FileId);
 
-            modelBuilder.Entity<FileGroupShareEntity>()
-                .HasOne(fg => fg.Group)
-                .WithMany()
-                .HasForeignKey(fg => fg.GroupId);
+            //modelBuilder.Entity<FileGroupShareEntity>()
+            //    .HasOne(fg => fg.Group)
+            //    .WithMany()
+            //    .HasForeignKey(fg => fg.GroupId);
+
+            //modelBuilder.Entity<FileEntity>()
+            //    .HasOne(f => f.UploadedByUser)
+            //    .WithMany(u => u.UploadedFiles)
+            //    .HasForeignKey(f => f.UploadedByUserId);
 
             modelBuilder.Entity<FileEntity>()
-        .HasOne(f => f.UploadedByUser)
-        .WithMany(u => u.UploadedFiles)
-        .HasForeignKey(f => f.UploadedByUserId);
+                .HasMany(f => f.UserEntities)
+                .WithMany(u => u.UploadedFiles)
+                .UsingEntity<FileUserShareEntity>(f => f.HasKey(fg => new { fg.FileId, fg.UserId }));
+
+            modelBuilder.Entity<FileEntity>()
+                .HasMany(f => f.GroupEntities)
+                .WithMany(u => u.UploadedFiles)
+                .UsingEntity<FileGroupShareEntity>(f => f.HasKey(fg => new { fg.FileId, fg.GroupId }));
+
             base.OnModelCreating(modelBuilder);
         }
     }

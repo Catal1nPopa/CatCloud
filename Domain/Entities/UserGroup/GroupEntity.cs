@@ -14,6 +14,7 @@ namespace Domain.Entities.UserGroup
 
         public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
         public ICollection<UserGroupRoleEntity> UserGroupRoles { get; set; } = new List<UserGroupRoleEntity>();
+        public ICollection<FileEntity> UploadedFiles { get; set; }
         public ICollection<FileGroupShareEntity> SharedFiles { get; set; }
     }
 }
