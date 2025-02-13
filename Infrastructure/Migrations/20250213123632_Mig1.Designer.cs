@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    [Migration("20250213093952_Mig1")]
+    [Migration("20250213123632_Mig1")]
     partial class Mig1
     {
         /// <inheritdoc />
@@ -134,6 +134,25 @@ namespace Infrastructure.Migrations
                     b.ToTable("FileUserShares");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission.GroupPermissionsEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GroupPermissions");
+                });
+
             modelBuilder.Entity("Domain.Entities.Permission.PermissionEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -185,6 +204,26 @@ namespace Infrastructure.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Permission.UserGroupPermissionsEntity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "GroupId", "PermissionId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("UserGroupPermissions");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
@@ -256,36 +295,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("UserGroups");
                 });
 
-            modelBuilder.Entity("GroupEntityRoleEntity", b =>
-                {
-                    b.Property<Guid>("GroupsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RolsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("GroupsId", "RolsId");
-
-                    b.HasIndex("RolsId");
-
-                    b.ToTable("GroupEntityRoleEntity");
-                });
-
-            modelBuilder.Entity("RoleEntityUserEntity", b =>
-                {
-                    b.Property<Guid>("RolsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("RolsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("RoleEntityUserEntity");
-                });
-
             modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Auth.UserEntity", "Owner")
@@ -354,6 +363,33 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission.UserGroupPermissionsEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
+                        .WithMany("UserGroupPermissions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Permission.GroupPermissionsEntity", "Permission")
+                        .WithMany("UserGroupPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Auth.UserEntity", "User")
+                        .WithMany("UserGroupPermissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Permission.RoleEntity", "Role")
@@ -403,38 +439,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("GroupEntityRoleEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", null)
-                        .WithMany()
-                        .HasForeignKey("GroupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Permission.RoleEntity", null)
-                        .WithMany()
-                        .HasForeignKey("RolsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RoleEntityUserEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.Permission.RoleEntity", null)
-                        .WithMany()
-                        .HasForeignKey("RolsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Auth.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
+                    b.Navigation("UserGroupPermissions");
+
                     b.Navigation("UserRoles");
                 });
 
@@ -445,6 +453,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("SharedWithUsers");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission.GroupPermissionsEntity", b =>
+                {
+                    b.Navigation("UserGroupPermissions");
+                });
+
             modelBuilder.Entity("Domain.Entities.Permission.PermissionEntity", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -453,6 +466,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Permission.RoleEntity", b =>
                 {
                     b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
+                {
+                    b.Navigation("UserGroupPermissions");
                 });
 #pragma warning restore 612, 618
         }

@@ -37,13 +37,9 @@ namespace Domain.Entities.Auth
         }
 
         public ICollection<UserRoleEntity> UserRoles { get; set; } = new List<UserRoleEntity>();
-        //public ICollection<UserGroupRoleEntity> UserGroupRoles { get; set; } = new List<UserGroupRoleEntity>();
         public ICollection<FileEntity> UploadedFiles { get; set; }
         public ICollection<GroupEntity> Groups { get; set; }
-        //adaugat
-        public ICollection<RoleEntity> Rols { get; set; }
+        public ICollection<UserGroupPermissionsEntity> UserGroupPermissions { get; set; }
 
-        //public ICollection<FileUserShareEntity> SharedFiles { get; set; }
-        //public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
     }
 }
