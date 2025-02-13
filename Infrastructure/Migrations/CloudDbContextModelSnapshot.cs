@@ -90,6 +90,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UploadedByUserId");
+
                     b.ToTable("Files");
                 });
 
@@ -229,27 +231,43 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
                     b.Property<double>("TotalSpace")
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserGroup.UserGroupEntity", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("UserId", "GroupId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("GroupId");
+                    b.HasKey("GroupId", "UserId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserGroups");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Auth.UserEntity", "Owner")
+                        .WithMany()
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Domain.Entities.Files.FileGroupShareEntity", b =>
@@ -261,7 +279,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
-                        .WithMany("SharedFiles")
+                        .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -280,7 +298,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Auth.UserEntity", "User")
-                        .WithMany("SharedFiles")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -355,16 +373,27 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Auth.UserEntity", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Domain.Entities.UserGroup.UserGroupEntity", b =>
                 {
                     b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
-                        .WithMany("UserGroups")
+                        .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Auth.UserEntity", "User")
-                        .WithMany("UserGroups")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -376,11 +405,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
-                    b.Navigation("SharedFiles");
-
                     b.Navigation("UserGroupRoles");
-
-                    b.Navigation("UserGroups");
 
                     b.Navigation("UserRoles");
                 });
@@ -401,11 +426,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
                 {
-                    b.Navigation("SharedFiles");
-
                     b.Navigation("UserGroupRoles");
-
-                    b.Navigation("UserGroups");
                 });
 #pragma warning restore 612, 618
         }

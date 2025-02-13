@@ -6,5 +6,6 @@
         public string Description { get; set; }
         public double TotalSpace { get; set; }
         public double AvailableSpace { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }

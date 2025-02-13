@@ -27,20 +27,18 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configurarea cheii compuse pentru UserGroup
-            modelBuilder.Entity<UserGroupEntity>()
-                .HasKey(ug => new { ug.UserId, ug.GroupId });
+            modelBuilder.Entity<GroupEntity>()
+                .HasOne(g => g.Owner)
+                .WithMany()
+                .HasForeignKey(g => g.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<UserGroupEntity>()
-                .HasOne(ug => ug.User)
-                .WithMany(u => u.UserGroups)
-                .HasForeignKey(ug => ug.UserId);
+            modelBuilder.Entity<GroupEntity>()
+                .HasMany(f => f.UserEntities)
+                .WithMany(u => u.Groups)
+                .UsingEntity<UserGroupEntity>(f => f.HasKey(fg => new { fg.GroupId, fg.UserId }));
 
-            modelBuilder.Entity<UserGroupEntity>()
-                .HasOne(ug => ug.Group)
-                .WithMany(g => g.UserGroups)
-                .HasForeignKey(ug => ug.GroupId);
-
+            //---------------------------------------------------
             // Configurare pentru UserGroupRole - cheie compusa
             modelBuilder.Entity<UserGroupRoleEntity>()
                 .HasKey(ugr => new { ugr.UserId, ugr.GroupId, ugr.RoleId });
@@ -88,38 +86,13 @@ namespace Infrastructure
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
 
-            // Configurare pentru partajarea fisierului cu utilizatori
-            //modelBuilder.Entity<FileUserShareEntity>()
-            //    .HasKey(fu => new { fu.FileId, fu.UserId });
+            // ------------------------------------------
 
-            //modelBuilder.Entity<FileUserShareEntity>()
-            //    .HasOne(fu => fu.File)
-            //    .WithMany(f => f.SharedWithUsers)
-            //    .HasForeignKey(fu => fu.FileId);
-
-            //modelBuilder.Entity<FileUserShareEntity>()
-            //    .HasOne(fu => fu.User)
-            //    .WithMany()
-            //    .HasForeignKey(fu => fu.UserId);
-
-            // Configurare pentru partajarea fisierului cu grupuri
-            //modelBuilder.Entity<FileGroupShareEntity>()
-            //    .HasKey(fg => new { fg.FileId, fg.GroupId });
-
-            //modelBuilder.Entity<FileGroupShareEntity>()
-            //    .HasOne(fg => fg.File)
-            //    .WithMany(f => f.SharedWithGroups)
-            //    .HasForeignKey(fg => fg.FileId);
-
-            //modelBuilder.Entity<FileGroupShareEntity>()
-            //    .HasOne(fg => fg.Group)
-            //    .WithMany()
-            //    .HasForeignKey(fg => fg.GroupId);
-
-            //modelBuilder.Entity<FileEntity>()
-            //    .HasOne(f => f.UploadedByUser)
-            //    .WithMany(u => u.UploadedFiles)
-            //    .HasForeignKey(f => f.UploadedByUserId);
+            modelBuilder.Entity<FileEntity>()
+                .HasOne(g => g.Owner)
+                .WithMany()
+                .HasForeignKey(g => g.UploadedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<FileEntity>()
                 .HasMany(f => f.UserEntities)
