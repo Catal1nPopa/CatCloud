@@ -1,7 +1,5 @@
 ﻿using Domain.Entities.Permission;
-using Domain.Entities.UserGroup;
 using Domain.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repository
@@ -10,7 +8,7 @@ namespace Infrastructure.Repository
     {
         private readonly CloudDbContext _dbContext = dbContext;
 
-        public async Task AddPermission(string permission)
+        public async Task AddPermission(string permission) //lucreaza
         {
             var existingPermission = await _dbContext.Permissions
                 .FirstOrDefaultAsync(p => p.Name == permission);
@@ -20,6 +18,7 @@ namespace Infrastructure.Repository
                 var newPermission = new PermissionEntity
                 {
                     Id = Guid.NewGuid(),
+                    Description = "s",
                     Name = permission
                 };
 
@@ -30,81 +29,77 @@ namespace Infrastructure.Repository
                 throw new Exception($"Permisiunea data deja a fost creata");
         }
 
-        public async Task AddRole(string roleName)
+        public async Task AddRole(string roleName)  //lucreaza
         {
-            var existingRole = await _dbContext.Roles
-                .FirstOrDefaultAsync(r => r.Name == roleName);
-
-            if (existingRole == null)
+            try
             {
-                var newRole = new RoleEntity
-                {
-                    Id = Guid.NewGuid(),
-                    Name = roleName
-                };
 
-                _dbContext.Roles.Add(newRole);
-                await _dbContext.SaveChangesAsync();
+                var existingRole = await _dbContext.Roles
+                    .FirstOrDefaultAsync(r => r.Name == roleName);
+
+                if (existingRole == null)
+                {
+                    var newRole = new RoleEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        Description = "tres",
+                        Name = roleName
+                    };
+
+                    _dbContext.Roles.Add(newRole);
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                    throw new ArgumentException($"Rolul dat deja a fost creat");
             }
-            else
-                throw new ArgumentException($"Rolul dat deja a fost creat");
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task AssignPermissionsToRole(string roleName, List<string> permissions)
+        public async Task AssignPermissionsToRole(string roleName, List<string> permissionNames) //lucreaza
         {
             var role = await _dbContext.Roles
-                .Include(r => r.RolePermissions)
+                .Include(r => r.RolePermissions) // Asigură includerea relațiilor
+                .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(r => r.Name == roleName);
 
             if (role == null)
-            {
-                throw new Exception($"Rolul '{roleName}' nu există.");
-            }
+                throw new ArgumentException($"Rolul '{roleName}' nu există.");
 
-            var existingPermissions = await _dbContext.Permissions
-                .Where(p => permissions.Contains(p.Name))
+            // Căutăm permisiunile existente după nume
+            var permissions = await _dbContext.Permissions
+                .Where(p => permissionNames.Contains(p.Name))
                 .ToListAsync();
 
-            var permissionsToAdd = permissions
-                .Except(existingPermissions.Select(p => p.Name))
-                .ToList();
+            if (permissions.Count == 0)
+                throw new ArgumentException("Nicio permisiune validă nu a fost găsită.");
 
-            var duplicates = permissionsToAdd
-                .GroupBy(p => p)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToList();
+            // Verificăm permisiunile deja atribuite acestui rol
+            var existingPermissionIds = role.RolePermissions.Select(rp => rp.PermissionId).ToList();
 
-            if (duplicates.Any())
-            {
-                throw new Exception($"Permisiunile duplicate: {string.Join(", ", duplicates)}.");
-            }
-
-            var newPermissions = permissionsToAdd
-                .Select(pName => new PermissionEntity
+            // Creăm noi intrări doar pentru permisiunile care nu sunt deja atribuite
+            var newRolePermissions = permissions
+                .Where(p => !existingPermissionIds.Contains(p.Id))
+                .Select(p => new RolePermissionEntity
                 {
-                    Id = Guid.NewGuid(),
-                    Name = pName
+                    RoleId = role.Id,
+                    PermissionId = p.Id
                 })
                 .ToList();
 
-            _dbContext.Permissions.AddRange(newPermissions);
-
-            var allPermissions = existingPermissions.Concat(newPermissions);
-
-            foreach (var permission in allPermissions)
+            if (newRolePermissions.Any())
             {
-                if (!role.RolePermissions.Any(rp => rp.PermissionId == permission.Id))
-                {
-                    role.RolePermissions.Add(new RolePermissionEntity
-                    {
-                        RoleId = role.Id,
-                        PermissionId = permission.Id
-                    });
-                }
+                await _dbContext.RolePermissions.AddRangeAsync(newRolePermissions);
+                await _dbContext.SaveChangesAsync();
             }
-            await _dbContext.SaveChangesAsync();
+            else
+            {
+                throw new InvalidOperationException($"Toate permisiunile specificate sunt deja atribuite rolului '{roleName}'.");
+            }
         }
+
 
         public async Task DeletePermission(string permission)
         {
@@ -223,85 +218,88 @@ namespace Infrastructure.Repository
 
         public async Task RemoveRoleFromUserInGroup(Guid userId, Guid groupId, string roleName)
         {
-            var userGroupRole = await _dbContext.UserGroupRoles
-                .Include(ugr => ugr.Role)
-                .FirstOrDefaultAsync(ugr =>
-                    ugr.UserId == userId &&
-                    ugr.GroupId == groupId &&
-                    ugr.Role.Name == roleName
-                );
+            //var userGroupRole = await _dbContext.UserGroupRoles
+            //    .Include(ugr => ugr.Role)
+            //    .FirstOrDefaultAsync(ugr =>
+            //        ugr.UserId == userId &&
+            //        ugr.GroupId == groupId &&
+            //        ugr.Role.Name == roleName
+            //    );
 
-            if (userGroupRole == null)
-            {
-                throw new Exception($"Rolul '{roleName}' nu este asignat utilizatorului în acest grup.");
-            }
+            //if (userGroupRole == null)
+            //{
+            //    throw new Exception($"Rolul '{roleName}' nu este asignat utilizatorului în acest grup.");
+            //}
 
-            _dbContext.UserGroupRoles.Remove(userGroupRole);
-            await _dbContext.SaveChangesAsync();
+            //_dbContext.UserGroupRoles.Remove(userGroupRole);
+            //await _dbContext.SaveChangesAsync();
+            throw new NotImplementedException();
         }
 
 
         public async Task<List<string>> GetUserRolesInGroup(Guid userId, Guid groupId)
         {
-            var roles = await _dbContext.UserGroupRoles
-                .Where(ugr => ugr.UserId == userId && ugr.GroupId == groupId)
-                .Select(ugr => ugr.Role.Name)
-                .ToListAsync();
+            //var roles = await _dbContext.UserGroupRoles
+            //    .Where(ugr => ugr.UserId == userId && ugr.GroupId == groupId)
+            //    .Select(ugr => ugr.Role.Name)
+            //    .ToListAsync();
 
-            return roles;
+            //return roles;
+            throw new NotImplementedException();
         }
 
         public async Task AssignRoleToUserInGroup(Guid userId, Guid groupId, string roleName)
         {
-            var user = await _dbContext.Users
-                .Include(u => u.UserGroupRoles)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+            //var user = await _dbContext.Users
+            //    .Include(u => u.UserGroupRoles)
+            //    .FirstOrDefaultAsync(u => u.Id == userId);
 
-            var group = await _dbContext.Groups
-                .FirstOrDefaultAsync(g => g.Id == groupId);
+            //var group = await _dbContext.Groups
+            //    .FirstOrDefaultAsync(g => g.Id == groupId);
 
-            var role = await _dbContext.Roles
-                .FirstOrDefaultAsync(r => r.Name == roleName);
+            //var role = await _dbContext.Roles
+            //    .FirstOrDefaultAsync(r => r.Name == roleName);
 
-            if (user == null)
-            {
-                throw new Exception("Utilizatorul nu a fost găsit.");
-            }
-            if (group == null)
-            {
-                throw new Exception("Grupul nu a fost găsit.");
-            }
-            if (role == null)
-            {
-                throw new Exception($"Rolul '{roleName}' nu există.");
-            }
+            //if (user == null)
+            //{
+            //    throw new Exception("Utilizatorul nu a fost găsit.");
+            //}
+            //if (group == null)
+            //{
+            //    throw new Exception("Grupul nu a fost găsit.");
+            //}
+            //if (role == null)
+            //{
+            //    throw new Exception($"Rolul '{roleName}' nu există.");
+            //}
 
-            var userGroup = await _dbContext.UserGroups
-                .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
+            //var userGroup = await _dbContext.UserGroups
+            //    .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
 
-            if (userGroup == null)
-            {
-                // Adăugăm utilizatorul în grup daca nu este deja
-                _dbContext.UserGroups.Add(new UserGroupEntity
-                {
-                    UserId = userId,
-                    GroupId = groupId
-                });
-            }
+            //if (userGroup == null)
+            //{
+            //    // Adăugăm utilizatorul în grup daca nu este deja
+            //    _dbContext.UserGroups.Add(new UserGroupEntity
+            //    {
+            //        UserId = userId,
+            //        GroupId = groupId
+            //    });
+            //}
 
-            if (user.UserGroupRoles.Any(ugr => ugr.GroupId == groupId && ugr.RoleId == role.Id))
-            {
-                throw new Exception($"Utilizatorul are deja rolul '{roleName}' în acest grup.");
-            }
+            //if (user.UserGroupRoles.Any(ugr => ugr.GroupId == groupId && ugr.RoleId == role.Id))
+            //{
+            //    throw new Exception($"Utilizatorul are deja rolul '{roleName}' în acest grup.");
+            //}
 
-            user.UserGroupRoles.Add(new UserGroupRoleEntity
-            {
-                UserId = userId,
-                GroupId = groupId,
-                RoleId = role.Id
-            });
+            //user.UserGroupRoles.Add(new UserGroupRoleEntity
+            //{
+            //    UserId = userId,
+            //    GroupId = groupId,
+            //    RoleId = role.Id
+            //});
 
-            await _dbContext.SaveChangesAsync();
+            //await _dbContext.SaveChangesAsync();
+            throw new NotImplementedException();
         }
     }
 }
