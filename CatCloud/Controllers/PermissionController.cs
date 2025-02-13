@@ -10,37 +10,37 @@ namespace CatCloud.Controllers
         private readonly IPermissionsService _permissionsService = permissionsService;
 
         [HttpPost("roles")]
-        public async Task<IActionResult> AddRole([FromBody] string roleName)
+        public async Task<IActionResult> AddRole([FromQuery] string roleName)
         {
-                await _permissionsService.AddRole(roleName);
-                return Ok(new { Message = $"rol adaugat {roleName}" });
+            await _permissionsService.AddRole(roleName);
+            return Ok(new { Message = $"rol adaugat {roleName}" });
         }
 
         [HttpDelete("roles/{roleName}")]
         public async Task<IActionResult> DeleteRole(string roleName)
         {
-                await _permissionsService.DeleteRole(roleName);
-                return Ok();
+            await _permissionsService.DeleteRole(roleName);
+            return Ok();
         }
 
         [HttpGet("roles")]
         public async Task<ActionResult<List<string>>> GetRoles()
         {
-                return Ok(await _permissionsService.GetRoles());
+            return Ok(await _permissionsService.GetRoles());
         }
 
         [HttpPost("permissions")]
-        public async Task<IActionResult> AddPermission([FromBody] string permission)
+        public async Task<IActionResult> AddPermission([FromQuery] string permission)
         {
-                await _permissionsService.AddPermission(permission);
-                return Ok(new { Message = $"Permisiune {permission} adaugata"});
+            await _permissionsService.AddPermission(permission);
+            return Ok(new { Message = $"Permisiune {permission} adaugata" });
         }
 
         [HttpDelete("permissions/{permission}")]
         public async Task<IActionResult> DeletePermission(string permission)
         {
-                await _permissionsService.DeletePermission(permission);
-                return Ok(new { Message = $"Permisiune {permission} stearsa" });
+            await _permissionsService.DeletePermission(permission);
+            return Ok(new { Message = $"Permisiune {permission} stearsa" });
         }
 
         [HttpGet("permissions")]

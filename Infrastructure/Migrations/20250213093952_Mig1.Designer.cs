@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    [Migration("20250213074625_Mig1")]
+    [Migration("20250213093952_Mig1")]
     partial class Mig1
     {
         /// <inheritdoc />
@@ -140,6 +140,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -154,6 +158,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -179,37 +187,23 @@ namespace Infrastructure.Migrations
                     b.ToTable("RolePermissions");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Permission.UserGroupRoleEntity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GroupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("UserId", "GroupId", "RoleId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("UserGroupRoles");
-                });
-
             modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserRoles");
                 });
@@ -260,6 +254,36 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserGroups");
+                });
+
+            modelBuilder.Entity("GroupEntityRoleEntity", b =>
+                {
+                    b.Property<Guid>("GroupsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RolsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("GroupsId", "RolsId");
+
+                    b.HasIndex("RolsId");
+
+                    b.ToTable("GroupEntityRoleEntity");
+                });
+
+            modelBuilder.Entity("RoleEntityUserEntity", b =>
+                {
+                    b.Property<Guid>("RolsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RolsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("RoleEntityUserEntity");
                 });
 
             modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
@@ -314,7 +338,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Permission.RolePermissionEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Permission.PermissionEntity", "Permission")
-                        .WithMany()
+                        .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -330,37 +354,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Permission.UserGroupRoleEntity", b =>
-                {
-                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", "Group")
-                        .WithMany("UserGroupRoles")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Permission.RoleEntity", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Auth.UserEntity", "User")
-                        .WithMany("UserGroupRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Entities.Permission.UserRoleEntity", b =>
                 {
                     b.HasOne("Domain.Entities.Permission.RoleEntity", "Role")
-                        .WithMany("UserRoles")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -406,10 +403,38 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("GroupEntityRoleEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.UserGroup.GroupEntity", null)
+                        .WithMany()
+                        .HasForeignKey("GroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Permission.RoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("RoleEntityUserEntity", b =>
+                {
+                    b.HasOne("Domain.Entities.Permission.RoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RolsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Auth.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Auth.UserEntity", b =>
                 {
-                    b.Navigation("UserGroupRoles");
-
                     b.Navigation("UserRoles");
                 });
 
@@ -420,16 +445,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("SharedWithUsers");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission.PermissionEntity", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("Domain.Entities.Permission.RoleEntity", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("Domain.Entities.UserGroup.GroupEntity", b =>
-                {
-                    b.Navigation("UserGroupRoles");
                 });
 #pragma warning restore 612, 618
         }
