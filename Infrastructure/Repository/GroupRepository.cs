@@ -10,13 +10,21 @@ namespace Infrastructure.Repository
         private readonly CloudDbContext _dbContext = dbContext;
         public async Task CreateGroup(GroupEntity groupEntity)
         {
-            if (await _dbContext.Groups.FirstOrDefaultAsync(u => u.Name == groupEntity.Name) == null)
+            if (await _dbContext.Groups.AnyAsync(g => g.Name == groupEntity.Name))
             {
-                _dbContext.Groups.Add(groupEntity);
-                await _dbContext.SaveChangesAsync();
-            }
-            else
                 throw new Exception($"Eroare la creare grup, grup existent");
+            }
+
+            var owner = await _dbContext.Users.FindAsync(groupEntity.OwnerId);
+            if (owner == null)
+            {
+                throw new Exception($"Utilizatorul nu există");
+            }
+
+            groupEntity.UserEntities = new List<UserEntity> { owner };
+
+            _dbContext.Groups.Add(groupEntity);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteGroup(Guid groupId)
@@ -71,44 +79,65 @@ namespace Infrastructure.Repository
 
         public async Task LinkUserToGroup(LinkUserToGroupEntity data)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == data.UserId);
             var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == data.GroupId);
-
-            if (user != null && group != null)
+            if (group == null)
             {
-                var userGroup = new UserGroupEntity
+                throw new Exception("Grupul nu există.");
+            }
+
+            var users = await _dbContext.Users.Where(u => data.UserIds.Contains(u.Id)).ToListAsync();
+            if (!users.Any())
+            {
+                throw new Exception("Niciun utilizator valid nu a fost găsit.");
+            }
+
+            var existingUserGroups = await _dbContext.UserGroups
+                .Where(ug => ug.GroupId == data.GroupId && data.UserIds.Contains(ug.UserId))
+                .Select(ug => ug.UserId)
+                .ToListAsync();
+
+            var newUserGroups = users
+                .Where(u => !existingUserGroups.Contains(u.Id))
+                .Select(u => new UserGroupEntity
                 {
-                    UserId = user.Id,
+                    UserId = u.Id,
                     GroupId = group.Id
-                };
+                })
+                .ToList();
+
+            if (newUserGroups.Any())
+            {
                 try
                 {
-
-                    _dbContext.UserGroups.Add(userGroup);
+                    await _dbContext.UserGroups.AddRangeAsync(newUserGroups);
                     await _dbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{ex}");
+                    throw new Exception($"Eroare la adăugarea utilizatorilor în grup: {ex.Message}");
                 }
             }
             else
-                throw new Exception($"Utilizator sau grup nu exista");
+            {
+                throw new Exception("Toți utilizatorii selectați sunt deja în acest grup.");
+            }
         }
+
 
         public async Task UnlinkUserFromGroup(LinkUserToGroupEntity data)
         {
-            var userGroup = await _dbContext.UserGroups
-                .FirstOrDefaultAsync(ug => ug.UserId == data.UserId && ug.GroupId == data.GroupId);
-            if (userGroup != null)
-            {
-                _dbContext.UserGroups.Remove(userGroup);
-                await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                throw new Exception("Utilizatorul nu este asociat cu acest grup.");
-            }
+            //var userGroup = await _dbContext.UserGroups
+            //    .FirstOrDefaultAsync(ug => ug.UserId == data.UserId && ug.GroupId == data.GroupId);
+            //if (userGroup != null)
+            //{
+            //    _dbContext.UserGroups.Remove(userGroup);
+            //    await _dbContext.SaveChangesAsync();
+            //}
+            //else
+            //{
+            //    throw new Exception("Utilizatorul nu este asociat cu acest grup.");
+            //}
+            throw new NotImplementedException();
         }
 
         public async Task<List<GroupEntity>> GetUserGroups(Guid userId)

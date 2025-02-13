@@ -13,7 +13,7 @@ namespace Domain.Entities.Files
         public Guid UploadedByUserId { get; set; }
         public string ContentType { get; set; }
 
-        //public UserEntity UploadedByUser { get; set; }
+        public UserEntity Owner { get; set; }
 
 
         public ICollection<FileUserShareEntity> SharedWithUsers { get; set; }

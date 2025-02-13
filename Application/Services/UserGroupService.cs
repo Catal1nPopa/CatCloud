@@ -8,11 +8,14 @@ using Mapster;
 
 namespace Application.Services
 {
-    public class UserGroupService(IGroupRepository groupRepository) : IUserGroupService
+    public class UserGroupService(IGroupRepository groupRepository,
+        IUserProvider userProvider) : IUserGroupService
     {
         private readonly IGroupRepository _groupRepository = groupRepository;
+        private readonly IUserProvider _userProvider = userProvider;
         public async Task CreateGroup(GroupDTO groupEntity)
         {
+            groupEntity.OwnerId = _userProvider.GetUserId();
             groupEntity.Created = DateTime.UtcNow;
             await _groupRepository.CreateGroup(groupEntity.Adapt<GroupEntity>());
             LoggerHelper.LogWarning($"Grup nou creat {groupEntity.Name}");

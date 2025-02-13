@@ -36,10 +36,11 @@ namespace Domain.Entities.Auth
             Added = added;
         }
 
-        public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
         public ICollection<UserRoleEntity> UserRoles { get; set; } = new List<UserRoleEntity>();
         public ICollection<UserGroupRoleEntity> UserGroupRoles { get; set; } = new List<UserGroupRoleEntity>();
         public ICollection<FileEntity> UploadedFiles { get; set; }
-        public ICollection<FileUserShareEntity> SharedFiles { get; set; }
+        public ICollection<GroupEntity> Groups { get; set; }
+        //public ICollection<FileUserShareEntity> SharedFiles { get; set; }
+        //public ICollection<UserGroupEntity> UserGroups { get; set; } = new List<UserGroupEntity>();
     }
 }
