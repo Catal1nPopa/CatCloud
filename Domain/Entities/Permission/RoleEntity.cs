@@ -1,7 +1,4 @@
-﻿using Domain.Entities.Auth;
-using Domain.Entities.UserGroup;
-
-namespace Domain.Entities.Permission
+﻿namespace Domain.Entities.Permission
 {
     public class RoleEntity
     {
@@ -11,8 +8,5 @@ namespace Domain.Entities.Permission
 
         public ICollection<PermissionEntity> Permissions { get; set; } = new List<PermissionEntity>();
         public ICollection<RolePermissionEntity> RolePermissions { get; set; } = new List<RolePermissionEntity>();
-
-        public ICollection<UserEntity> Users { get; set; }
-        public ICollection<GroupEntity> Groups { get; set; }
     }
 }

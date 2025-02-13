@@ -12,6 +12,19 @@ namespace Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "GroupPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupPermissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -127,30 +140,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleEntityUserEntity",
-                columns: table => new
-                {
-                    RolsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UsersId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoleEntityUserEntity", x => new { x.RolsId, x.UsersId });
-                    table.ForeignKey(
-                        name: "FK_RoleEntityUserEntity_Roles_RolsId",
-                        column: x => x.RolsId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RoleEntityUserEntity_Users_UsersId",
-                        column: x => x.UsersId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
@@ -226,25 +215,32 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GroupEntityRoleEntity",
+                name: "UserGroupPermissions",
                 columns: table => new
                 {
-                    GroupsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RolsId = table.Column<Guid>(type: "uuid", nullable: false)
+                    GroupId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PermissionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupEntityRoleEntity", x => new { x.GroupsId, x.RolsId });
+                    table.PrimaryKey("PK_UserGroupPermissions", x => new { x.UserId, x.GroupId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_GroupEntityRoleEntity_Groups_GroupsId",
-                        column: x => x.GroupsId,
+                        name: "FK_UserGroupPermissions_GroupPermissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "GroupPermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserGroupPermissions_Groups_GroupId",
+                        column: x => x.GroupId,
                         principalTable: "Groups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupEntityRoleEntity_Roles_RolsId",
-                        column: x => x.RolsId,
-                        principalTable: "Roles",
+                        name: "FK_UserGroupPermissions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -289,23 +285,23 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupEntityRoleEntity_RolsId",
-                table: "GroupEntityRoleEntity",
-                column: "RolsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Groups_OwnerId",
                 table: "Groups",
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleEntityUserEntity_UsersId",
-                table: "RoleEntityUserEntity",
-                column: "UsersId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserGroupPermissions_GroupId",
+                table: "UserGroupPermissions",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserGroupPermissions_PermissionId",
+                table: "UserGroupPermissions",
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
@@ -334,13 +330,10 @@ namespace Infrastructure.Migrations
                 name: "FileUserShares");
 
             migrationBuilder.DropTable(
-                name: "GroupEntityRoleEntity");
-
-            migrationBuilder.DropTable(
-                name: "RoleEntityUserEntity");
-
-            migrationBuilder.DropTable(
                 name: "RolePermissions");
+
+            migrationBuilder.DropTable(
+                name: "UserGroupPermissions");
 
             migrationBuilder.DropTable(
                 name: "UserGroups");
@@ -353,6 +346,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "GroupPermissions");
 
             migrationBuilder.DropTable(
                 name: "Groups");
