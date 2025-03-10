@@ -18,6 +18,7 @@ namespace Application.Configuration
             services.AddScoped<IPermissionsService, PermissionsService>();
             services.AddScoped<IFilesService, FileService>();
             services.AddScoped<IUserProvider, UserProvider>();
+            services.AddScoped<IFolderService, FolderService>();
             services.AddHttpContextAccessor();
             services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
             services.AddInfrastructure();

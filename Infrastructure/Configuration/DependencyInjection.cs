@@ -3,7 +3,6 @@ using Helper.Serilog;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace Infrastructure.Configuration
 {
@@ -15,6 +14,7 @@ namespace Infrastructure.Configuration
             services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<IPermissionsRepository, PermissionsRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
+            services.AddScoped<IFolderRepository, FolderRepository>();
 
             services.AddScoped<CloudDbContext>();
 

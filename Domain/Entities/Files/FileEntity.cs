@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Auth;
+using Domain.Entities.Folder;
 using Domain.Entities.UserGroup;
 
 namespace Domain.Entities.Files
@@ -20,5 +21,9 @@ namespace Domain.Entities.Files
         public ICollection<FileGroupShareEntity> SharedWithGroups { get; set; }
         public ICollection<UserEntity> UserEntities { get; set; }
         public ICollection<GroupEntity> GroupEntities { get; set; }
+
+        //pentru folder
+        public Guid? FolderId { get; set; }
+        public FolderEntity? Folder { get; set; }
     }
 }

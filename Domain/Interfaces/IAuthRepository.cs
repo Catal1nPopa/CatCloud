@@ -7,5 +7,6 @@ namespace Domain.Interfaces
         Task AddUser(UserEntity userEntity);
         Task<UserEntity> GetUserByUsername(string username);
         Task<UserEntity> GetUserById(Guid userId);
+        Task DeleteUser(Guid userId);
     }
 }

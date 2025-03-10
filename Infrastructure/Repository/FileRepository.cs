@@ -43,7 +43,19 @@ namespace Infrastructure.Repository
                         User = user
                     };
                     _cloudDbContext.FileUserShares.Add(userShare);
+
+                    //adauga file catre user nou
+                    //var copyFile = file;
+                    //copyFile.UploadedByUserId = userId;
+                    //copyFile.Owner = user;
+                    //copyFile.SharedWithUsers = null;
+                    //copyFile.SharedWithGroups = null;
+                    //copyFile.
+
+                    //_cloudDbContext.Files.Add(fileEntity);
                 }
+                else
+                    throw new Exception("Fisierul deja a fost partajat");
             }
             await _cloudDbContext.SaveChangesAsync();
         }
@@ -187,6 +199,46 @@ namespace Infrastructure.Repository
             })
             .ToListAsync();
 
+            return res;
+        }
+
+        public async Task<List<FilesMetadataEntity>> GetUserOrphanFilesMetadata(Guid userId)
+        {
+            var res = await _cloudDbContext.Files
+                .Where(file => file.FolderId == null && file.UploadedByUserId == userId)
+                .Include(f => f.SharedWithUsers).ThenInclude(f => f.User)
+                .Include(f => f.SharedWithGroups).ThenInclude(swu => swu.Group)
+                .Select(f => new FilesMetadataEntity
+                {
+                    Id = f.Id,
+                    FileName = f.FileName,
+                    FileSize = f.FileSize,
+                    UploadedAt = f.UploadedAt,
+                    ContentType = f.ContentType,
+                    SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
+                    SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
+                })
+                .ToListAsync();
+            return res;
+        }
+
+        public async Task<List<FilesMetadataEntity>> GetUserFolderFilesMetadata(Guid userId, Guid folderId)
+        {
+            var res = await _cloudDbContext.Files
+                .Where(file => file.FolderId == folderId && file.UploadedByUserId == userId)
+                .Include(f => f.SharedWithUsers).ThenInclude(f => f.User)
+                .Include(f => f.SharedWithGroups).ThenInclude(swu => swu.Group)
+                .Select(f => new FilesMetadataEntity
+                {
+                    Id = f.Id,
+                    FileName = f.FileName,
+                    FileSize = f.FileSize,
+                    UploadedAt = f.UploadedAt,
+                    ContentType = f.ContentType,
+                    SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
+                    SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
+                })
+                .ToListAsync();
             return res;
         }
 

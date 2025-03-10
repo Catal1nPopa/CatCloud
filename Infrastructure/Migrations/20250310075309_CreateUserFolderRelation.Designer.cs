@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CloudDbContext))]
-    partial class CloudDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250310075309_CreateUserFolderRelation")]
+    partial class CreateUserFolderRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,9 +85,6 @@ namespace Infrastructure.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid?>("FolderId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -92,8 +92,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FolderId");
 
                     b.HasIndex("UploadedByUserId");
 
@@ -156,7 +154,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Folders");
+                    b.ToTable("FolderEntity");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.GroupPermissionsEntity", b =>
@@ -322,18 +320,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Files.FileEntity", b =>
                 {
-                    b.HasOne("Domain.Entities.Folder.FolderEntity", "Folder")
-                        .WithMany("Files")
-                        .HasForeignKey("FolderId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Domain.Entities.Auth.UserEntity", "Owner")
                         .WithMany()
                         .HasForeignKey("UploadedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Folder");
 
                     b.Navigation("Owner");
                 });
@@ -496,11 +487,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("SharedWithGroups");
 
                     b.Navigation("SharedWithUsers");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Folder.FolderEntity", b =>
-                {
-                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission.GroupPermissionsEntity", b =>
