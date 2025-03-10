@@ -202,10 +202,34 @@ namespace CatCloud.Controllers
             }
         }
 
-        //[HttpGet("userGroupFilesMetadata")]
-        //public async Task<ActionResult<List<>>> UserGroupFilesMetadata(Guid userId)
-        //{
+        [Authorize]
+        [HttpGet("userOrphanFilesMetadata")]
+        public async Task<ActionResult<List<FileMetadata>>> GetUserOrphanFileMetadata()
+        {
+            try
+            {
+                var result = await _filesService.GetUserOrphanFilesMetadata();
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-        //}
+        //[Authorize]
+        [HttpGet("userFolderFilesMetadata")]
+        public async Task<ActionResult<List<FileMetadata>>> GetUserFolderFileMetadata(Guid folderId)
+        {
+            try
+            {
+                var result = await _filesService.GetUserFolderFilesMetadata(folderId);
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

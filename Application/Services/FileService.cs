@@ -161,6 +161,18 @@ namespace Application.Services
             var files = await _fileRepository.GetUserFilesMetadata(userId);
             return files.Adapt<List<FilesMetadataDTO>>();
         }
+        public async Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata()
+        {
+            var userId = _userProvider.GetUserId();
+            var files = await _fileRepository.GetUserOrphanFilesMetadata(userId);
+            return files.Adapt<List<FilesMetadataDTO>>();
+        }
+        public async Task<List<FilesMetadataDTO>> GetUserFolderFilesMetadata(Guid folderId)
+        {
+            var userId = _userProvider.GetUserId();
+            var files = await _fileRepository.GetUserFolderFilesMetadata(userId, folderId);
+            return files.Adapt<List<FilesMetadataDTO>>();
+        }
 
         //public async Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)
         //{

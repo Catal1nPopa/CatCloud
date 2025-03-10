@@ -11,28 +11,28 @@ namespace Infrastructure.Repository
         private readonly CloudDbContext _dbContext = dbContext;
         public async Task AddUser(UserEntity userEntity)
         {
-            //    try
-            //    {
-            var checkIfExist = await GetUserByUsername(userEntity.Username);
-            if (checkIfExist == null)
+            try
             {
-                _dbContext.Users.Add(userEntity);
-                await _dbContext.SaveChangesAsync();
-                LoggerHelper.LogInformation($"Utilizator creat : Email {userEntity.Email}, username: {userEntity.Username}, data : {userEntity.Added}, spatiu acordat : {userEntity.TotalStorage}");
+                var checkIfExist = await GetUserByUsername(userEntity.Username);
+                if (checkIfExist == null)
+                {
+                    _dbContext.Users.Add(userEntity);
+                    await _dbContext.SaveChangesAsync();
+                    LoggerHelper.LogInformation($"Utilizator creat : Email {userEntity.Email}, username: {userEntity.Username}, data : {userEntity.Added}, spatiu acordat : {userEntity.TotalStorage}");
+                }
+                else
+                    throw new Exception("Utilizator cu acest nume deja exista, alegeti alt nume va rog");
             }
-            else
-                throw new Exception("Utilizator cu acest nume deja exista, alegeti alt nume va rog");
-            //}
-            //catch (NpgsqlException exception)
-            //{
-            //    LoggerHelper.LogInformation($"A aparut o eroare la adaugarea utilizatorului in baza de date - {exception}");
-            //    throw new InvalidOperationException(exception.Message);
-            //}
-            //catch (Exception exception)
-            //{
-            //    LoggerHelper.LogInformation($"A aparut o eroare la adaugare utilizator - {exception}");
-            //    throw new ApplicationException(exception.Message);
-            //}
+            catch (NpgsqlException exception)
+            {
+                LoggerHelper.LogInformation($"A aparut o eroare la adaugarea utilizatorului in baza de date - {exception}");
+                throw new InvalidOperationException(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.LogInformation($"A aparut o eroare la adaugare utilizator - {exception}");
+                throw new ApplicationException(exception.Message);
+            }
         }
 
         public async Task<UserEntity> GetUserByUsername(string username)
@@ -70,6 +70,23 @@ namespace Infrastructure.Repository
             {
                 LoggerHelper.LogInformation($"Eroare la obtinerea utilizator - {userId}, exception - {exception}");
                 throw new ApplicationException($"Eroare la obtinerea utilizator : {userId}");
+            }
+        }
+
+        public async Task DeleteUser(Guid userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users.SingleOrDefaultAsync(user => user.Id == userId);
+                if (user != null)
+                {
+                    _dbContext.Users.Remove(user);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($"Eroare la stergere utilizator | {userId}");
             }
         }
     }

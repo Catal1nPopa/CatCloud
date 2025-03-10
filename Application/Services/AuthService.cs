@@ -43,7 +43,7 @@ namespace Application.Services
                 var tokenDescriptor = new SecurityTokenDescriptor()
                 {
                     Subject = identity,
-                    Expires = DateTime.Now.AddMinutes(7),
+                    Expires = DateTime.Now.AddMinutes(60),
                     SigningCredentials = credentials,
                     Issuer = _configuration.GetSection("Jwt").GetSection("Issuer").Value,
                     Audience = _configuration.GetSection("Jwt").GetSection("Audience").Value
@@ -75,6 +75,11 @@ namespace Application.Services
             var user = new UserEntity(userData.Username, passwordHash, Convert.ToHexString(salt), userData.Email, userData.EmailConfirmed,
                 userData.TotalStorage, userData.AvailableStorage, DateTime.UtcNow);
             await _authRepository.AddUser(user.Adapt<UserEntity>());
+        }
+
+        public async Task DeleteUser(Guid userId)
+        {
+            await _authRepository.DeleteUser(userId);
         }
     }
 }

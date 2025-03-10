@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Files;
+using Domain.Entities.Folder;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using System.Security.Cryptography;
@@ -40,6 +41,7 @@ namespace Domain.Entities.Auth
         public ICollection<FileEntity> UploadedFiles { get; set; }
         public ICollection<GroupEntity> Groups { get; set; }
         public ICollection<UserGroupPermissionsEntity> UserGroupPermissions { get; set; }
+        public ICollection<FolderEntity> Folders { get; set; }
 
     }
 }

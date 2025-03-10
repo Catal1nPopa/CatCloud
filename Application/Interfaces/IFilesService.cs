@@ -15,5 +15,8 @@ namespace Application.Interfaces
         Task CopyFile(CopyFileDTO fileDTO);
         Task<List<FilesMetadataDTO>> GetUserFilesMetadata();
         //Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId);
+
+        Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata();
+        Task<List<FilesMetadataDTO>> GetUserFolderFilesMetadata(Guid folderId);
     }
 }

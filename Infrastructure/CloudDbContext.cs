@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Auth;
 using Domain.Entities.Files;
+using Domain.Entities.Folder;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ namespace Infrastructure
         public DbSet<FileEntity> Files { get; set; }
         public DbSet<FileUserShareEntity> FileUserShares { get; set; }
         public DbSet<FileGroupShareEntity> FileGroupShares { get; set; }
+        public DbSet<FolderEntity> Folders { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -77,6 +79,20 @@ namespace Infrastructure
                 .HasMany(f => f.GroupEntities)
                 .WithMany(u => u.UploadedFiles)
                 .UsingEntity<FileGroupShareEntity>(f => f.HasKey(fg => new { fg.FileId, fg.GroupId }));
+
+            //relatia user - folder unu la multi 
+            modelBuilder.Entity<FolderEntity>()
+                .HasOne(owner => owner.Owner)
+                .WithMany(folders => folders.Folders)
+                .HasForeignKey(fkey => fkey.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //relatia folder - file unu la multi
+            modelBuilder.Entity<FileEntity>()
+                .HasOne(folder => folder.Folder)
+                .WithMany(folder => folder.Files)
+                .HasForeignKey(fkey => fkey.FolderId)
+                .OnDelete(DeleteBehavior.SetNull); //fisierul ramne orfan in caz de stergere
 
             base.OnModelCreating(modelBuilder);
         }
