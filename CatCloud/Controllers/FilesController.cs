@@ -30,11 +30,11 @@ namespace CatCloud.Controllers
             }
         }
         [HttpDelete("file")]
-        public async Task<IActionResult> DeleteFile(Guid fileId, Guid userId)
+        public async Task<IActionResult> DeleteFile(Guid fileId)
         {
             try
             {
-                await _filesService.DeleteFile(fileId, userId);
+                await _filesService.DeleteFile(fileId);
                 return Ok(new { Message = $"Fisierul {fileId} sters cu succes" });
             }
             catch (Exception ex)
@@ -194,6 +194,21 @@ namespace CatCloud.Controllers
             try
             {
                 var result = await _filesService.GetUserFilesMetadata();
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("userSharedFilesMetadata")]
+        public async Task<ActionResult<List<FileMetadata>>> GetUserSharedFileMetadata()
+        {
+            try
+            {
+                var result = await _filesService.GetUserSharedFilesMetadata();
                 return Ok(result.Adapt<List<FileMetadata>>());
             }
             catch (Exception ex)

@@ -140,8 +140,9 @@ namespace Application.Services
             throw new Exception($"Eroare la accesare memorie");
         }
 
-        public async Task DeleteFile(Guid fileId, Guid userId)
+        public async Task DeleteFile(Guid fileId)
         {
+            var userId = _userProvider.GetUserId();
             await _fileRepository.DeleteFile(fileId, userId);
         }
 
@@ -161,6 +162,14 @@ namespace Application.Services
             var files = await _fileRepository.GetUserFilesMetadata(userId);
             return files.Adapt<List<FilesMetadataDTO>>();
         }
+
+        public async Task<List<FilesMetadataDTO>> GetUserSharedFilesMetadata()
+        {
+            var userId = _userProvider.GetUserId();
+            var files = await _fileRepository.GetUserSharedFilesMetadata(userId);
+            return files.Adapt<List<FilesMetadataDTO>>();
+        }
+
         public async Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata()
         {
             var userId = _userProvider.GetUserId();
