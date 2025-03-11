@@ -255,5 +255,35 @@ namespace Infrastructure.Repository
             List<FilesMetadataEntity> resEntity = new List<FilesMetadataEntity>();
             return resEntity;
         }
+
+        public async Task<List<FilesMetadataEntity>> GetUserSharedFilesMetadata(Guid userId)
+        {
+            try
+            {
+                var sharedFiles = await _cloudDbContext.FileUserShares
+                    .Where(fu => fu.UserId == userId)
+                    .Include(fu => fu.File)
+                    .ThenInclude(f => f.SharedWithUsers)
+                    .Include(fu => fu.File)
+                    .ThenInclude(f => f.SharedWithGroups)
+                    .Select(fu => new FilesMetadataEntity
+                    {
+                        Id = fu.File.Id,
+                        FileName = fu.File.FileName,
+                        FileSize = fu.File.FileSize,
+                        UploadedAt = fu.File.UploadedAt,
+                        ContentType = fu.File.ContentType,
+                        SharedWithUsers = fu.File.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
+                        SharedWithGroups = fu.File.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
+                    })
+                    .ToListAsync();
+
+                return sharedFiles;
+            }
+            catch
+            {
+                throw new Exception($"Eroare la obținerea metadatelor fișierelor partajate pentru utilizatorul: {userId}");
+            }
+        }
     }
 }
