@@ -246,5 +246,29 @@ namespace CatCloud.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize]
+        [HttpGet("fileDonwload")]
+        public async Task<IActionResult> DownloadFile(Guid fileId)
+        {
+            try
+            {
+                var file = await _filesService.DownloadFile(fileId);
+                //var fileBytes = await System.IO.File.ReadAllBytesAsync(file.FilePath);
+
+                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{file.FileName}\"";
+
+                var memoryStream = new MemoryStream();
+                await file.File.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                return File(memoryStream, file.ContentType, file.FileName);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
 }
