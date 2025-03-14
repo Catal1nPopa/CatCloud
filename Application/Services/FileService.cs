@@ -102,7 +102,8 @@ namespace Application.Services
                         UploadedByUserId = file.UploadedByUserId,
                         FileName = file.FileName,
                         FileSize = file.FileSize,
-                        UploadedAt = file.UploadedAt
+                        UploadedAt = file.UploadedAt,
+                        ContentType = file.ContentType
                     };
 
                     FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
@@ -181,6 +182,21 @@ namespace Application.Services
             var userId = _userProvider.GetUserId();
             var files = await _fileRepository.GetUserFolderFilesMetadata(userId, folderId);
             return files.Adapt<List<FilesMetadataDTO>>();
+        }
+
+        public async Task<GetFilesDTO> DownloadFile(Guid fileId)
+        {
+            var userId = _userProvider.GetUserId();
+            var file = await _fileRepository.GetFileById(fileId, userId);
+            List<FileEntity> filesToDecrypt = new List<FileEntity>();
+            filesToDecrypt.Add(file);
+            var fileDecrypted = await GetDecryptedFiles(filesToDecrypt);
+
+            if (fileDecrypted == null || !File.Exists(file.FilePath))
+            {
+                throw new Exception("File not found.");
+            }
+            return fileDecrypted.First();
         }
 
         //public async Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)

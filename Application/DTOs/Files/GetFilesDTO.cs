@@ -10,5 +10,6 @@ namespace Application.DTOs.Files
         public DateTime UploadedAt { get; set; }
         public Guid UploadedByUserId { get; set; }
         public IFormFile File { get; set; }
+        public string ContentType { get; set; }
     }
 }

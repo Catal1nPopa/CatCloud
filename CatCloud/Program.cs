@@ -16,9 +16,11 @@ try
     {
         options.AddPolicy("AllowSpecificOrigins", policy =>
         {
-            policy.WithOrigins("https://localhost:4200", "https://localhost:3001", "http://localhost:3001")
+            policy.WithOrigins("https://localhost:3001", "http://localhost:3001")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials()
+                  .WithExposedHeaders("Content-Disposition");
         });
     });
 

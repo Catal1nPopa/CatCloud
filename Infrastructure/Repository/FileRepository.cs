@@ -172,7 +172,7 @@ namespace Infrastructure.Repository
         {
             try
             {
-                return await _cloudDbContext.Files.FirstOrDefaultAsync(id => id.Id == fileId && id.UploadedByUserId == authorId);
+                return await _cloudDbContext.Files.FirstOrDefaultAsync(id => id.Id == fileId); //&& id.UploadedByUserId == authorId
             }
             catch (Exception ex)
             {

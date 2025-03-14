@@ -19,5 +19,6 @@ namespace Application.Interfaces
 
         Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata();
         Task<List<FilesMetadataDTO>> GetUserFolderFilesMetadata(Guid folderId);
+        Task<GetFilesDTO> DownloadFile(Guid fileId);
     }
 }
