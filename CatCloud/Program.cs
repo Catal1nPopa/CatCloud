@@ -1,6 +1,8 @@
 using Application.Configuration;
 using Application.Configuration.ExceptionConfig;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
@@ -10,6 +12,13 @@ try
 {
 
     var builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 6L * 1024 * 1024 * 1024; // 6 GB
+    });
+
+
     builder.Services.ApplicationInjection(builder.Configuration);
 
     builder.Services.AddCors(options =>

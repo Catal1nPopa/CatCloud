@@ -14,6 +14,7 @@ namespace Domain.Entities.Auth
         public string Password { get; set; }
         public string Salt { get; set; }
         public bool EmailConfirmed { get; set; }
+        public bool Enabled { get; set; }
         public double TotalStorage { get; set; }
         public double AvailableStorage { get; set; }
         public DateTime Added { get; set; }

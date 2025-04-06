@@ -10,8 +10,6 @@ namespace Domain.Entities.UserGroup
         public string Name { get; set; }
         public string Description { get; set; }
         public Guid OwnerId { get; set; }
-        public double TotalSpace { get; set; }
-        public double AvailableSpace { get; set; }
         public DateTime Created { get; set; }
 
         public UserEntity Owner { get; set; }

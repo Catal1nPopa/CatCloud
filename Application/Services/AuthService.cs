@@ -13,10 +13,13 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class AuthService(IAuthRepository authRepository, IConfiguration configuration) : IAuthService
+    public class AuthService(IAuthRepository authRepository, 
+        IConfiguration configuration,
+        IUserProvider userProvider) : IAuthService
     {
         private readonly IAuthRepository _authRepository = authRepository;
         private readonly IConfiguration _configuration = configuration;
+        private readonly IUserProvider _userProvider = userProvider;
         public async Task<string> GetAuthentication(UserCredentialDTO authRequest)
         {
             try
@@ -25,6 +28,10 @@ namespace Application.Services
                 if (user == null || !user.CheckPassword(authRequest.Password))
                 {
                     return null;
+                }
+                if (!user.Enabled)
+                {
+                    throw new Exception("Contul respectiv nu este activat, contactati suportul");
                 }
 
                 var jwtHandler = new JwtSecurityTokenHandler();
@@ -54,7 +61,7 @@ namespace Application.Services
             catch (Exception ex)
             {
                 LoggerHelper.LogWarning($"Eroare la autentificare username |{authRequest.UserName}|");
-                return ex.Message.ToString();
+                throw new Exception(ex.Message);
             }
         }
         string HashPassword(string password, out byte[] salt)
@@ -72,6 +79,9 @@ namespace Application.Services
         public async Task CreateUser(UserDTO userData)
         {
             var passwordHash = HashPassword(userData.Password, out var salt);
+            long totalStorage = (long)(userData.TotalStorage * 1073741824);
+            userData.AvailableStorage = totalStorage;
+            userData.TotalStorage = totalStorage;
             var user = new UserEntity(userData.Username, passwordHash, Convert.ToHexString(salt), userData.Email, userData.EmailConfirmed,
                 userData.TotalStorage, userData.AvailableStorage, DateTime.UtcNow);
             await _authRepository.AddUser(user.Adapt<UserEntity>());
@@ -80,6 +90,19 @@ namespace Application.Services
         public async Task DeleteUser(Guid userId)
         {
             await _authRepository.DeleteUser(userId);
+        }
+
+        public async Task<List<UserInfoDTO>> GetUsers()
+        {
+            var users = await _authRepository.GetAllUsers();
+            return users.Adapt<List<UserInfoDTO>>();
+        }
+
+        public async Task<List<UserInfoDTO>> GetUsersToShareFile(Guid fileId)
+        {
+            Guid userId = _userProvider.GetUserId();
+            List<UserEntity> users = await _authRepository.GetUsersNotSharedWithFile(fileId, userId);
+            return users.Adapt<List<UserInfoDTO>>();
         }
     }
 }

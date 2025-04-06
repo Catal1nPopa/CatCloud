@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Files;
+using Domain.Entities.UserGroup;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -155,7 +156,7 @@ namespace Infrastructure.Repository
                 {
                     File.Delete(file.FilePath);
                 }
-
+                
                 _cloudDbContext.Files.Remove(file);
                 _cloudDbContext.FileUserShares.RemoveRange(_cloudDbContext.FileUserShares.Where(fu => fu.FileId == fileId));
                 //_cloudDbContext.FileGroupShares.RemoveRange(_cloudDbContext.FileGroupShares.Where(fg => fg.FileId == fileId));
@@ -220,6 +221,28 @@ namespace Infrastructure.Repository
                 })
                 .ToListAsync();
             return res;
+        }
+
+        public async Task<List<GroupFilesMetadata>> GetGroupFilesMetadata(Guid groupId)
+        {
+            var files = await _cloudDbContext.Files
+                //.Include(f => f.Owner) //cine a incarcat
+                .Include(f => f.GroupEntities) // cu ce grupuri e partajat
+                .ThenInclude(g => g.UserEntities) //utilizatorii grupului
+                .Where(f => f.GroupEntities.Any(g => g.Id == groupId))
+                .Select(file => new GroupFilesMetadata
+                {
+                    Id = file.Id,
+                    FileName = file.FileName,
+                    FileSize = file.FileSize,
+                    UploadedAt = file.UploadedAt,
+                    ContentType = file.ContentType,
+                    OwnerFile = file.Owner.Email,
+                    //Users = file.UserEntities.Select(email => email.Email).ToList(),  
+                })
+                .ToListAsync();
+
+            return files;
         }
 
         public async Task<List<FilesMetadataEntity>> GetUserFolderFilesMetadata(Guid userId, Guid folderId)

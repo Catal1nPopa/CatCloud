@@ -1,8 +1,11 @@
 ﻿using Application.DTOs.Files;
 using Application.Interfaces;
+using Application.Services;
 using CatCloud.Models.File;
+using CatCloud.Models.User;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 
@@ -14,13 +17,15 @@ namespace CatCloud.Controllers
     {
         private readonly IFilesService _filesService = filesService;
 
+        [DisableRequestSizeLimit]
+        [RequestSizeLimit(6L * 1024 * 1024 * 1024)]
         [HttpPost("file")]
-        public async Task<IActionResult> UploadFile(IFormFile userFile, Guid userId)
+        public async Task<IActionResult> UploadFile(IFormFile userFile)
         {
             try
             {
                 var fileMetadata = new FileUploadModel(
-                    userFile.FileName, DateTime.UtcNow, userFile.Length, userId, userFile.ContentType);
+                    userFile.FileName, DateTime.UtcNow, userFile.Length, userFile.ContentType);
                 await _filesService.UploadFiles(userFile, fileMetadata.Adapt<FilesDTO>());
                 return Ok(new { Message = $"Fisierul {userFile.FileName} incarcat cu succes" });
             }
@@ -43,85 +48,15 @@ namespace CatCloud.Controllers
             }
         }
 
-        [HttpGet("file")]
-        public async Task<IActionResult> DownloadAllUserFiles(Guid userId)
-        {
-            var files = await _filesService.GetUserFiles(userId);
-
-            if (files == null || !files.Any())
-            {
-                return NotFound("Nu au fost găsite fișiere pentru acest utilizator.");
-            }
-
-            var memoryStream = new MemoryStream();
-
-            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-            {
-                foreach (var fileRecord in files)
-                {
-                    if (fileRecord.File != null)
-                    {
-                        var zipEntry = archive.CreateEntry(fileRecord.FileName, CompressionLevel.Fastest);
-
-                        using (var entryStream = zipEntry.Open())
-                        using (var fileStream = fileRecord.File.OpenReadStream())
-                        {
-                            await fileStream.CopyToAsync(entryStream);
-                        }
-                    }
-                }
-            }
-            memoryStream.Position = 0;
-            return File(memoryStream, "application/zip", $"User_{userId}_Files.zip");
-        }
-
         [HttpPost("shareUsers")]
         public async Task<IActionResult> ShareFileWithUsers(ShareFileModel shareFileModel)
         {
             try
             {
                 await _filesService.ShareFileWithUsers(shareFileModel.fileId, shareFileModel.objectIds);
-                return Ok(new { Message = $"Fisierul {shareFileModel.fileId} a fost partajat cu utilizatorii: {shareFileModel.objectIds}" });
+                return Ok(new { Message = $"Fisierul a fost partajat cu {shareFileModel.objectIds.Count} utilizatori" });
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
-        }
-
-        [HttpGet("shareUsers")]
-        public async Task<IActionResult> GetFilesSharedWithUser(Guid userId)
-        {
-            try
-            {
-                var files = await _filesService.GetFilesSharedWithUser(userId);
-                if (files == null || !files.Any())
-                {
-                    return NotFound("Nu au fost găsite fișiere pentru acest utilizator.");
-                }
-
-                var memoryStream = new MemoryStream();
-
-                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-                {
-                    foreach (var fileRecord in files)
-                    {
-                        if (fileRecord.File != null)
-                        {
-                            var zipEntry = archive.CreateEntry(fileRecord.FileName, CompressionLevel.Fastest);
-
-                            using (var entryStream = zipEntry.Open())
-                            using (var fileStream = fileRecord.File.OpenReadStream())
-                            {
-                                await fileStream.CopyToAsync(entryStream);
-                            }
-                        }
-                    }
-                }
-                memoryStream.Position = 0;
-                return File(memoryStream, "application/zip", $"User_{userId}_Files.zip");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
 
         [HttpPost("shareGroup")]
@@ -133,44 +68,6 @@ namespace CatCloud.Controllers
                 return Ok(new { Message = $"Fisierul {shareFileModel.fileId} a fost partajat cu utilizatorii: {shareFileModel.objectIds}" });
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
-        }
-
-        [HttpGet("shareGroup")]
-        public async Task<IActionResult> GetFilesSharedWithGroup(Guid groupId)
-        {
-            try
-            {
-                var files = await _filesService.GetFilesSharedWithGroup(groupId);
-                if (files == null || !files.Any())
-                {
-                    return NotFound("Nu au fost găsite fișiere pentru acest utilizator.");
-                }
-
-                var memoryStream = new MemoryStream();
-
-                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-                {
-                    foreach (var fileRecord in files)
-                    {
-                        if (fileRecord.File != null)
-                        {
-                            var zipEntry = archive.CreateEntry(fileRecord.FileName, CompressionLevel.Fastest);
-
-                            using (var entryStream = zipEntry.Open())
-                            using (var fileStream = fileRecord.File.OpenReadStream())
-                            {
-                                await fileStream.CopyToAsync(entryStream);
-                            }
-                        }
-                    }
-                }
-                memoryStream.Position = 0;
-                return File(memoryStream, "application/zip", $"Group_{groupId}_Files.zip");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
 
         [HttpPost("copyFile")]
@@ -194,6 +91,21 @@ namespace CatCloud.Controllers
             try
             {
                 var result = await _filesService.GetUserFilesMetadata();
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //[Authorize]
+        [HttpGet("groupFilesMetadata")]
+        public async Task<ActionResult<List<FileMetadata>>> GetGroupFileMetadata(Guid groupId)
+        {
+            try
+            {
+                var result = await _filesService.GetGroupFilesMetadata(groupId);
                 return Ok(result.Adapt<List<FileMetadata>>());
             }
             catch (Exception ex)
@@ -248,27 +160,28 @@ namespace CatCloud.Controllers
         }
 
         [Authorize]
-        [HttpGet("fileDonwload")]
+        [HttpGet("fileDownload")]
         public async Task<IActionResult> DownloadFile(Guid fileId)
         {
             try
             {
-                var file = await _filesService.DownloadFile(fileId);
-                //var fileBytes = await System.IO.File.ReadAllBytesAsync(file.FilePath);
+                var file = await _filesService.DownloadFile(fileId);    
+                if (file == null)
+                {
+                    return NotFound("File not found.");
+                }
 
-                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{file.FileName}\"";
+                var encodedFileName = Uri.EscapeDataString(file.FileName); 
+                Response.Headers["Content-Disposition"] = $"attachment; filename*=UTF-8''{encodedFileName}";
 
-                var memoryStream = new MemoryStream();
-                await file.File.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-                return File(memoryStream, file.ContentType, file.FileName);
+                var stream = file.File.OpenReadStream(); 
 
+                return File(stream, file.ContentType, file.FileName, enableRangeProcessing: true);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"Error downloading file: {ex.Message}");
             }
-
         }
     }
 }

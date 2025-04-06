@@ -59,8 +59,6 @@ namespace Infrastructure.Repository
 
                     group.Name = updatedGroup.Name;
                     group.Description = updatedGroup.Description;
-                    group.TotalSpace = updatedGroup.TotalSpace;
-                    group.AvailableSpace = updatedGroup.AvailableSpace;
 
                     _dbContext.Groups.Update(group);
                     await _dbContext.SaveChangesAsync();
@@ -179,6 +177,22 @@ namespace Infrastructure.Repository
             {
                 throw new Exception($"Eroare la obținerea utilizatorilor grupului: {ex.Message}");
             }
+        }
+
+        public async Task<List<GroupEntity>> GetGroupsNotSharedWithFile(Guid fileId,Guid userId)
+        {
+            var userGroupIds = _dbContext.UserGroups
+                .Where(ug => ug.UserId == userId)
+                .Select(ug => ug.GroupId);
+
+            var sharedGroupIds = _dbContext.FileGroupShares
+                .Where(fgs => fgs.FileId == fileId)
+                .Select(fgs => fgs.GroupId);
+
+            var availableGroups = await _dbContext.Groups
+                .Where(g => userGroupIds.Contains(g.Id) && !sharedGroupIds.Contains(g.Id))
+                .ToListAsync();
+            return availableGroups;
         }
     }
 }

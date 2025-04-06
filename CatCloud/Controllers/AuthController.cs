@@ -16,12 +16,21 @@ namespace CatCloud.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserCredentialsModel userCredentials)
         {
-            var token = await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
-            if (token != null) { return Ok(new { token = token }); }
-            return BadRequest(new { message = "Credentiale invalide " });
+            try {
+                var token = await _authService.GetAuthentication(userCredentials.Adapt<UserCredentialDTO>());
+                if (token != null) 
+                {
+                    return Ok(new { token = token }); 
+                }
+                return BadRequest("Credentiale invalide");
+            }
+            catch(Exception ex) {
+                throw new Exception(ex.Message);
+                //return BadRequest(new { message = "Eroare la autentificare ${" });
+            }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("User")]
         public async Task<IActionResult> CreateUser(UserModel userData)
         {
@@ -39,12 +48,39 @@ namespace CatCloud.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpDelete("User")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
             await _authService.DeleteUser(userId);
             return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("User")]
+        public async Task<ActionResult<List<UserInfoModel>>> GetAllUsers()
+        {
+            try
+            {
+                var users = await _authService.GetUsers();
+                return Ok(users.Adapt<List<UserInfoModel>>());
+            }
+            catch(Exception ex) { return BadRequest(ex.Message); }
+        }
+
+        [Authorize]
+        [HttpGet("usersToShare")]
+        public async Task<ActionResult<List<UserInfoModel>>> GetUsersToShareFile(Guid fileId)
+        {
+            try
+            {
+                var users = await _authService.GetUsersToShareFile(fileId);
+                return Ok(users.Adapt<List<UserInfoModel>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Files;
+using Domain.Entities.UserGroup;
 
 namespace Domain.Interfaces
 {
@@ -18,5 +19,6 @@ namespace Domain.Interfaces
 
         Task<List<FilesMetadataEntity>> GetUserOrphanFilesMetadata(Guid userId);
         Task<List<FilesMetadataEntity>> GetUserFolderFilesMetadata(Guid userId, Guid folderId);
+        Task<List<GroupFilesMetadata>> GetGroupFilesMetadata(Guid groupId);
     }
 }

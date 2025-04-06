@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Files;
 using Application.DTOs.Storage;
+using Application.DTOs.UserGroup;
 using Application.Interfaces;
 using Domain.Entities.Files;
 using Domain.Interfaces;
@@ -25,6 +26,14 @@ namespace Application.Services
 
         public async Task UploadFiles(IFormFile file, FilesDTO filesDTO)
         {
+            var userId = _userProvider.GetUserId();
+            var user = await _authRepository.GetUserById(userId);
+            //long availableStorageInBytes = (long)(user.AvailableStorage * 1073741824);
+            if (user.AvailableStorage <= filesDTO.FileSize)
+            {
+                throw new Exception($"Nu aveti memorie disponibila pentru acest fisier");
+            }
+            filesDTO.UploadedByUserId = userId;
             var storagePath = GetStoragePath(filesDTO.FileSize);
             var userFolderPath = Path.Combine(storagePath, "files", filesDTO.UploadedByUserId.ToString());
             if (!File.Exists(userFolderPath))
@@ -41,8 +50,12 @@ namespace Application.Services
 
             filesDTO.FilePath = filePath;
             FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-            await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId);
-            await _fileRepository.UploadFile(filesDTO.Adapt<FileEntity>());
+            var fileSize = await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId);
+            filesDTO.FileSize = fileSize;
+            if (await _authRepository.DecreaseAvailableSize(fileSize, userId))
+            {
+                await _fileRepository.UploadFile(filesDTO.Adapt<FileEntity>());
+            }
         }
 
         public async Task<List<GetFilesDTO>> GetUserFiles(Guid userId)
@@ -108,13 +121,19 @@ namespace Application.Services
 
                     FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
                     byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath);
-                    var memoryStream = new MemoryStream(decryptedBytes);
+                    //var memoryStream = new MemoryStream(decryptedBytes);
 
-                    fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, file.FileName)
-                    {
-                        Headers = new HeaderDictionary(),
-                        ContentType = "application/octet-stream"
-                    };
+                    //fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, file.FileName)
+                    //{
+                    //    Headers = new HeaderDictionary(),
+                    //    ContentType = "application/octet-stream"
+                    //};
+
+                    string decryptedFilePath = Path.Combine(Path.GetTempPath(), file.FileName);
+                    await File.WriteAllBytesAsync(decryptedFilePath, decryptedBytes);
+
+                    fileRecord.File = new FormFile(new FileStream(decryptedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), 0, new FileInfo(decryptedFilePath).Length, null, file.FileName);
+
 
                     fileRecords.Add(fileRecord);
                 }
@@ -144,6 +163,8 @@ namespace Application.Services
         public async Task DeleteFile(Guid fileId)
         {
             var userId = _userProvider.GetUserId();
+            var file = await _fileRepository.GetFileById(fileId, userId);
+            await _authRepository.IncreaseAvailableSize(file.FileSize, userId);
             await _fileRepository.DeleteFile(fileId, userId);
         }
 
@@ -197,6 +218,18 @@ namespace Application.Services
                 throw new Exception("File not found.");
             }
             return fileDecrypted.First();
+        }
+
+        public async Task<List<GroupFilesMetadataDTO>> GetGroupFilesMetadata(Guid groupId)
+        {
+            try
+            {
+                var files =  await _fileRepository.GetGroupFilesMetadata(groupId);
+                return files.Adapt<List<GroupFilesMetadataDTO>>();
+            }catch (Exception ex)
+            {
+                throw new Exception();
+            }
         }
 
         //public async Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId)

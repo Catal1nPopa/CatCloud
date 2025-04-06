@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Files;
+using Application.DTOs.UserGroup;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces
@@ -20,5 +21,6 @@ namespace Application.Interfaces
         Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata();
         Task<List<FilesMetadataDTO>> GetUserFolderFilesMetadata(Guid folderId);
         Task<GetFilesDTO> DownloadFile(Guid fileId);
+        Task<List<GroupFilesMetadataDTO>> GetGroupFilesMetadata(Guid groupId);
     }
 }

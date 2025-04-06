@@ -92,7 +92,7 @@ namespace Infrastructure
                 .HasOne(folder => folder.Folder)
                 .WithMany(folder => folder.Files)
                 .HasForeignKey(fkey => fkey.FolderId)
-                .OnDelete(DeleteBehavior.SetNull); //fisierul ramne orfan in caz de stergere
+                .OnDelete(DeleteBehavior.Cascade); // cand stergi un fodler se sterge si fisiere, pentru a nu stergi setam la SetNull
 
             base.OnModelCreating(modelBuilder);
         }

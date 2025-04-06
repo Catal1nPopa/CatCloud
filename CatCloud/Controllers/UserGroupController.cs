@@ -16,7 +16,7 @@ namespace CatCloud.Controllers
         private readonly IUserGroupService _userGroupService = userGroupService;
 
         [HttpPost("AddGroup")]
-        public async Task<IActionResult> AddGroup(GroupModel group)
+        public async Task<IActionResult> AddGroup(CreateGroupModel group)
         {
             await _userGroupService.CreateGroup(group.Adapt<GroupDTO>());
             return Ok();
@@ -58,9 +58,16 @@ namespace CatCloud.Controllers
         }
 
         [HttpGet("GetUserGroups")]
-        public async Task<ActionResult<GroupModel>> GetUserGroups(Guid userId)
+        public async Task<ActionResult<GroupModel>> GetUserGroups()
         {
-            var groups = await _userGroupService.GetUserGroups(userId);
+            var groups = await _userGroupService.GetUserGroups();
+            return Ok(groups.Adapt<List<GroupModel>>());
+        }
+
+        [HttpGet("GetGroupsNotSharedWithFile")]
+        public async Task<ActionResult<GroupModel>> GetGroupsNotSharedWithFile(Guid fileId)
+        {
+            var groups = await _userGroupService.GetGroupsNotSharedWithFile(fileId);
             return Ok(groups.Adapt<List<GroupModel>>());
         }
 

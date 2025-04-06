@@ -13,6 +13,6 @@ namespace CatCloud.Models.User
         public bool EmailConfirmed { get; set; }
         [Range(0, 50)]
         public double TotalStorage { get; set; }
-        public double AvailableStorage { get; set; }
+        //public double AvailableStorage { get; set; }
     }
 }

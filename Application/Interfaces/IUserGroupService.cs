@@ -13,6 +13,7 @@ namespace Application.Interfaces
         Task LinkUserToGroup(UserToGroupDTO data);
         Task UnlinkUserFromGroup(UserToGroupDTO data);
         Task<List<UserInfoDTO>> GetGroupUsers(Guid groupId);
-        Task<List<GroupDTO>> GetUserGroups(Guid userId);
+        Task<List<GroupDTO>> GetUserGroups();
+        Task<List<GroupDTO>> GetGroupsNotSharedWithFile(Guid fileId);
     }
 }

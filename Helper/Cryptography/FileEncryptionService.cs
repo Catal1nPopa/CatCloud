@@ -1,11 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Helper.Cryptography
 {
@@ -20,7 +15,7 @@ namespace Helper.Cryptography
         }
 
         //daca fisierul va fi private/ only me atunci se poate de adaugat  id la user in fisierul criptat
-        public async Task EncryptFileAsync(IFormFile inputFile, string outputFilePath, Guid userId)
+        public async Task<long> EncryptFileAsync(IFormFile inputFile, string outputFilePath, Guid userId)
         {
             using (Aes aesAlg = Aes.Create())
             {
@@ -41,7 +36,9 @@ namespace Helper.Cryptography
                 }
             }
 
-            Console.WriteLine("Fișierul a fost criptat și salvat la: " + outputFilePath);
+            Console.WriteLine($"Fișierul utilizatorului: {userId} a fost criptat și salvat la: " + outputFilePath);
+            long fileSizeInBytes = new FileInfo(outputFilePath).Length;
+            return fileSizeInBytes;
         }
 
         public async Task<byte[]> DecryptFileAsync(string encryptedFilePath)

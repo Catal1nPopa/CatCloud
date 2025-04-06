@@ -15,21 +15,42 @@ namespace Application.Services
 
         public Guid GetUserId()
         {
-            string id = _context.HttpContext.User.Claims
+            try
+            {
+                string id = _context.HttpContext.User.Claims
                        .FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier).Value;
             return Guid.Parse(id);
+            }
+            catch (Exception ex)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
 
         public string GetName()
         {
+            try
+            {
             return _context.HttpContext.User.Claims
                        .FirstOrDefault(i => i.Type == ClaimTypes.Name).Value;
+            }
+            catch(Exception ex)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
 
         public string GetEmail()
         {
+            try
+            {
             return _context.HttpContext.User.Claims
                        .FirstOrDefault(i => i.Type == ClaimTypes.Email).Value;
+            }
+            catch(Exception)
+            {
+                throw new UnauthorizedAccessException();
+            }
         }
     }
 }

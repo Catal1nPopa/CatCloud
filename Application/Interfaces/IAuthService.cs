@@ -7,5 +7,7 @@ namespace Application.Interfaces
         Task<string> GetAuthentication(UserCredentialDTO userCredential);
         Task CreateUser(UserDTO user);
         Task DeleteUser(Guid userId);
+        Task<List<UserInfoDTO>> GetUsers();
+        Task<List<UserInfoDTO>> GetUsersToShareFile(Guid fileId);
     }
 }

@@ -12,5 +12,6 @@ namespace Domain.Interfaces
         Task UnlinkUserFromGroup(LinkUserToGroupEntity data);
         Task<List<GroupEntity>> GetUserGroups(Guid userId);
         Task<List<UserEntity>> GetGroupUsers(Guid groupId);
+        Task<List<GroupEntity>> GetGroupsNotSharedWithFile(Guid fileId, Guid userId);
     }
 }
