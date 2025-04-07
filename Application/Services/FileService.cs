@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Files;
+using Application.DTOs.Statistics;
 using Application.DTOs.Storage;
 using Application.DTOs.UserGroup;
 using Application.Interfaces;
@@ -185,6 +186,20 @@ namespace Application.Services
             return files.Adapt<List<FilesMetadataDTO>>();
         }
 
+        public async Task<List<UserFilesStatisticsDTO>> GetUserFilesStatistics()
+        {
+            var userId = _userProvider.GetUserId();
+            List<FilesMetadataEntity> files = await _fileRepository.GetUserFilesMetadata(userId);
+            foreach (var file in files)
+            {
+                if (file.UploadedAt.Kind == DateTimeKind.Utc)
+                {
+                    file.UploadedAt = file.UploadedAt.ToLocalTime();
+                }
+            }
+            return files.Adapt<List<UserFilesStatisticsDTO>>();
+        }
+
         public async Task<List<FilesMetadataDTO>> GetUserSharedFilesMetadata()
         {
             var userId = _userProvider.GetUserId();
@@ -229,6 +244,20 @@ namespace Application.Services
             }catch (Exception ex)
             {
                 throw new Exception();
+            }
+        }
+
+        public async Task<List<FilesMetadataDTO>> LatestUploadedFilesMetadata()
+        {
+            try
+            {
+                Guid userId = _userProvider.GetUserId();
+                var files = await _fileRepository.LatestUploadedFilesMetadata(userId);
+                return files.Adapt<List<FilesMetadataDTO>>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
             }
         }
 

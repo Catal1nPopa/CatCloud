@@ -203,6 +203,25 @@ namespace Infrastructure.Repository
             return res;
         }
 
+        public async Task<List<FilesMetadataEntity>> LatestUploadedFilesMetadata(Guid userId)
+        {
+            var res = await _cloudDbContext.Files
+                .Where(f => f.UploadedByUserId == userId)
+                .OrderByDescending(f => f.UploadedAt)
+                .Take(10)
+                .Select(f => new FilesMetadataEntity
+                {
+                    Id = f.Id,
+                    FileName = f.FileName,
+                    FileSize = f.FileSize,
+                    UploadedAt = f.UploadedAt,
+                    ContentType = f.ContentType,
+                })
+                .ToListAsync();
+            return res;
+        }
+
+
         public async Task<List<FilesMetadataEntity>> GetUserOrphanFilesMetadata(Guid userId)
         {
             var res = await _cloudDbContext.Files

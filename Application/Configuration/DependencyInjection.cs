@@ -19,6 +19,9 @@ namespace Application.Configuration
             services.AddScoped<IFilesService, FileService>();
             services.AddScoped<IUserProvider, UserProvider>();
             services.AddScoped<IFolderService, FolderService>();
+            services.AddScoped<IStatisticsService, StatisticsService>();
+            services.AddScoped<ISendMailService, SendMailService>();
+
             services.AddHttpContextAccessor();
             services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));
             services.AddInfrastructure();

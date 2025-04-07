@@ -183,5 +183,20 @@ namespace CatCloud.Controllers
                 return BadRequest($"Error downloading file: {ex.Message}");
             }
         }
+
+        [Authorize]
+        [HttpGet("latestUplaodedFiles")]
+        public async Task<ActionResult<List<FileMetadata>>> GetLatestUplaodedFiles()
+        {
+            try
+            {
+                var result = await _filesService.LatestUploadedFilesMetadata();
+                return Ok(result.Adapt<List<FileMetadata>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

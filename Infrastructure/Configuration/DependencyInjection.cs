@@ -15,6 +15,7 @@ namespace Infrastructure.Configuration
             services.AddScoped<IPermissionsRepository, PermissionsRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IFolderRepository, FolderRepository>();
+            services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 
             services.AddScoped<CloudDbContext>();
 

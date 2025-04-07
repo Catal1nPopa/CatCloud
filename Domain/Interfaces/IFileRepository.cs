@@ -14,6 +14,7 @@ namespace Domain.Interfaces
         Task<List<FileEntity>> GetFilesSharedWithGroup(Guid groupId);
         Task<FileEntity> GetFileById(Guid fileId, Guid AuthorId);
         Task<List<FilesMetadataEntity>> GetUserFilesMetadata(Guid userId);
+        Task<List<FilesMetadataEntity>> LatestUploadedFilesMetadata(Guid userId);
         Task<List<FilesMetadataEntity>> GetUserSharedFilesMetadata(Guid userId);
         Task<List<FilesMetadataEntity>> GetUserGroupFilesMetadata(Guid userId);
 

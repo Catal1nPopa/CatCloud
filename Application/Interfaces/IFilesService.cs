@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Files;
+using Application.DTOs.Statistics;
 using Application.DTOs.UserGroup;
 using Microsoft.AspNetCore.Http;
 
@@ -16,8 +17,9 @@ namespace Application.Interfaces
         Task CopyFile(CopyFileDTO fileDTO);
         Task<List<FilesMetadataDTO>> GetUserFilesMetadata();
         Task<List<FilesMetadataDTO>> GetUserSharedFilesMetadata();
+        Task<List<FilesMetadataDTO>> LatestUploadedFilesMetadata();
         //Task<List<FilesMetadataDTO>> GetUserGroupFilesMetadata(Guid userId);
-
+        Task<List<UserFilesStatisticsDTO>> GetUserFilesStatistics();
         Task<List<FilesMetadataDTO>> GetUserOrphanFilesMetadata();
         Task<List<FilesMetadataDTO>> GetUserFolderFilesMetadata(Guid folderId);
         Task<GetFilesDTO> DownloadFile(Guid fileId);
