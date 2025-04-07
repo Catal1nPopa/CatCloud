@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.Files;
 using Domain.Entities.Folder;
+using Domain.Entities.Mail;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using System.Security.Cryptography;
@@ -43,6 +44,7 @@ namespace Domain.Entities.Auth
         public ICollection<GroupEntity> Groups { get; set; }
         public ICollection<UserGroupPermissionsEntity> UserGroupPermissions { get; set; }
         public ICollection<FolderEntity> Folders { get; set; }
+        public ICollection<RequestHelpEntity> RequestHelps { get; set; } = new List<RequestHelpEntity>();
 
     }
 }

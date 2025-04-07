@@ -4,13 +4,17 @@ using Application.Interfaces;
 using System.Net.Mail;
 using System.Net;
 using Application.DTOs.Mail;
+using Domain.Interfaces;
+using Mapster;
+using Domain.Entities.Mail;
 
 namespace Application.Services
 {
-    public class SendMailService(IAuthService authService) : ISendMailService
+    public class SendMailService(IAuthService authService, IHelpRepository helpRepository) : ISendMailService
     {
         //yvqs lfrj osaa ygqo
         private readonly IAuthService _authService = authService;
+        private readonly IHelpRepository _helpRepository = helpRepository;
         public async Task<bool> SendReuqestMoreSpace()
         {
             try
@@ -67,6 +71,13 @@ namespace Application.Services
                         await client.SendMailAsync(message);
                     }
                 }
+                HelpRequestDTO helpDTO = new HelpRequestDTO();
+                helpDTO.UserId = user.Id;
+                helpDTO.CreatedDate = DateTime.UtcNow;
+                helpDTO.Message = requestHelp.body;
+                helpDTO.Topic = requestHelp.topic;
+                helpDTO.Status = "Open";
+                await _helpRepository.RequestHelp(helpDTO.Adapt<RequestHelpEntity>());
 
                 return true;
             }
