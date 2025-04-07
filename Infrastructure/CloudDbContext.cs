@@ -1,6 +1,7 @@
 ﻿using Domain.Entities.Auth;
 using Domain.Entities.Files;
 using Domain.Entities.Folder;
+using Domain.Entities.Mail;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace Infrastructure
         public DbSet<FileUserShareEntity> FileUserShares { get; set; }
         public DbSet<FileGroupShareEntity> FileGroupShares { get; set; }
         public DbSet<FolderEntity> Folders { get; set; }
+        public DbSet<RequestHelpEntity> RequestHelps { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -93,6 +95,12 @@ namespace Infrastructure
                 .WithMany(folder => folder.Files)
                 .HasForeignKey(fkey => fkey.FolderId)
                 .OnDelete(DeleteBehavior.Cascade); // cand stergi un fodler se sterge si fisiere, pentru a nu stergi setam la SetNull
+
+            modelBuilder.Entity<RequestHelpEntity>()
+                .HasOne<UserEntity>()
+                .WithMany(u => u.RequestHelps)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
 
             base.OnModelCreating(modelBuilder);
         }
