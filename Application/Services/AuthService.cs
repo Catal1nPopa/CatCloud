@@ -104,5 +104,12 @@ namespace Application.Services
             List<UserEntity> users = await _authRepository.GetUsersNotSharedWithFile(fileId, userId);
             return users.Adapt<List<UserInfoDTO>>();
         }
+
+        public async Task<UserInfoDTO> GetUser()
+        {
+            Guid userId = _userProvider.GetUserId();
+            var user = await _authRepository.GetUserById(userId);
+            return user.Adapt<UserInfoDTO>();
+        }
     }
 }

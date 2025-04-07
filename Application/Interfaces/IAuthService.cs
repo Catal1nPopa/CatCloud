@@ -9,5 +9,6 @@ namespace Application.Interfaces
         Task DeleteUser(Guid userId);
         Task<List<UserInfoDTO>> GetUsers();
         Task<List<UserInfoDTO>> GetUsersToShareFile(Guid fileId);
+        Task<UserInfoDTO> GetUser();
     }
 }
