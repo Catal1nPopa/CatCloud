@@ -97,7 +97,7 @@ namespace Infrastructure
                 .OnDelete(DeleteBehavior.Cascade); // cand stergi un fodler se sterge si fisiere, pentru a nu stergi setam la SetNull
 
             modelBuilder.Entity<RequestHelpEntity>()
-                .HasOne<UserEntity>()
+                .HasOne(r => r.User)
                 .WithMany(u => u.RequestHelps)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade); 

@@ -86,5 +86,16 @@ namespace Application.Services
                 throw new Exception($"{ex.Message}");
             }
         }
+
+        public async Task<List<ResponseHelpDTO>> ShowAllHelpRequests()
+        {
+            var requests = await _helpRepository.ShowAllHelpRequests();
+            return requests.Adapt<List<ResponseHelpDTO>>();
+        }
+
+        public async Task UpdateHelpRequest(ResponseHelpDTO helpRequest)
+        {
+            await _helpRepository.UpdateHelpRequest(helpRequest.Adapt<ResponseHelpEntity>());
+        }
     }
 }

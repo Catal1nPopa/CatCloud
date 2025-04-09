@@ -30,7 +30,7 @@ namespace CatCloud.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("User")]
         public async Task<IActionResult> CreateUser(UserModel userData)
         {

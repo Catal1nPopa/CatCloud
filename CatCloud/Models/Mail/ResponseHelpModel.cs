@@ -1,10 +1,6 @@
-﻿
-
-using Domain.Entities.Auth;
-
-namespace Domain.Entities.Mail
+﻿namespace CatCloud.Models.Mail
 {
-    public class RequestHelpEntity
+    public class ResponseHelpModel
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
@@ -12,6 +8,7 @@ namespace Domain.Entities.Mail
         public string Topic { get; set; }
         public string Message { get; set; }
         public string Status { get; set; }
-        public UserEntity User { get; set; }
+        public string UserMail { get; set; }
+        public string Username { get; set; }
     }
 }

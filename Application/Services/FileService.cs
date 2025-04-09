@@ -51,7 +51,7 @@ namespace Application.Services
 
             filesDTO.FilePath = filePath;
             FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-            var fileSize = await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId);
+            var fileSize = await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId, filesDTO.UploadedAt);
             filesDTO.FileSize = fileSize;
             if (await _authRepository.DecreaseAvailableSize(fileSize, userId))
             {
@@ -74,7 +74,7 @@ namespace Application.Services
             if (File.Exists(fileData.FilePath))
             {
                 FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-                byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath);
+                byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath, fileEntity.UploadedAt);
                 var memoryStream = new MemoryStream(decryptedBytes);
 
                 fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
@@ -121,7 +121,7 @@ namespace Application.Services
                     };
 
                     FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-                    byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath);
+                    byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath, file.UploadedAt);
                     //var memoryStream = new MemoryStream(decryptedBytes);
 
                     //fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, file.FileName)
