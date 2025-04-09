@@ -37,15 +37,29 @@ namespace Application.Services
                 var jwtHandler = new JwtSecurityTokenHandler();
                 string getKey = _configuration.GetSection("Jwt").GetSection("Key").Value;
                 var key = Encoding.UTF8.GetBytes(getKey);
-                var identity = new ClaimsIdentity(new Claim[]
-                {
-                //new Claim(ClaimTypes.Role, user.Role),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-                });
+
+
+                //var identity = new ClaimsIdentity(new Claim[]
+                //{
+                //new Claim(ClaimTypes.Role, user.UserRoles.),
+                //new Claim(ClaimTypes.Email, user.Email),
+                //new Claim(ClaimTypes.Name, user.Username),
+                //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                //});
 
                 var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
+
+                var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                    };
+                foreach (var userRole in user.UserRoles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+                }
+
+                var identity = new ClaimsIdentity(claims);
 
                 var tokenDescriptor = new SecurityTokenDescriptor()
                 {
