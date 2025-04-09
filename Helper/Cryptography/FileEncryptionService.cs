@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Helper.Cryptography
 {
@@ -14,15 +15,20 @@ namespace Helper.Cryptography
             _key = Convert.FromBase64String(encryptionKeyBase64);
         }
 
-        //daca fisierul va fi private/ only me atunci se poate de adaugat  id la user in fisierul criptat
-        public async Task<long> EncryptFileAsync(IFormFile inputFile, string outputFilePath, Guid userId)
+        private byte[] GenerateIvFromDate(DateTime uploadedAt)
+        {
+            string ivString = uploadedAt.ToString("yyyyMMddHHmmss");
+            return Encoding.UTF8.GetBytes(ivString.PadRight(16, '0'));
+        }
+
+        public async Task<long> EncryptFileAsync(IFormFile inputFile, string outputFilePath, Guid userId, DateTime uploadedAt)
         {
             using (Aes aesAlg = Aes.Create())
             {
                 aesAlg.Key = _key;
                 aesAlg.Mode = CipherMode.CBC;
                 aesAlg.Padding = PaddingMode.PKCS7;
-                aesAlg.GenerateIV();
+                aesAlg.IV = GenerateIvFromDate(uploadedAt);
 
                 using (FileStream outputFileStream = new FileStream(outputFilePath, FileMode.Create))
                 {
@@ -41,7 +47,7 @@ namespace Helper.Cryptography
             return fileSizeInBytes;
         }
 
-        public async Task<byte[]> DecryptFileAsync(string encryptedFilePath)
+        public async Task<byte[]> DecryptFileAsync(string encryptedFilePath, DateTime uploadedAt)
         {
             using (FileStream inputFileStream = new FileStream(encryptedFilePath, FileMode.Open))
             {
@@ -51,10 +57,15 @@ namespace Helper.Cryptography
                     aesAlg.Mode = CipherMode.CBC;
                     aesAlg.Padding = PaddingMode.PKCS7;
 
-                    // Citim IV-ul din fișierul criptat
                     byte[] iv = new byte[aesAlg.BlockSize / 8];
                     await inputFileStream.ReadAsync(iv, 0, iv.Length);
                     aesAlg.IV = iv;
+
+                    byte[] expectedIv = GenerateIvFromDate(uploadedAt);
+                    if (!iv.SequenceEqual(expectedIv))
+                    {
+                        throw new InvalidOperationException("IV-ul din fișier nu corespunde cu data încărcării.");
+                    }
 
                     using (CryptoStream cryptoStream = new CryptoStream(inputFileStream, aesAlg.CreateDecryptor(), CryptoStreamMode.Read))
                     using (MemoryStream memoryStream = new MemoryStream())

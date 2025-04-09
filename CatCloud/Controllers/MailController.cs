@@ -1,6 +1,9 @@
-﻿using Application.DTOs.Mail;
+﻿using Application.DTOs.Auth;
+using Application.DTOs.Mail;
 using Application.Interfaces;
+using Application.Services;
 using CatCloud.Models.Mail;
+using CatCloud.Models.User;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -37,6 +40,36 @@ namespace CatCloud.Controllers
             {
                 bool status = await _sendMailService.RequestHelp(requestHelp.Adapt<RequestHelpDTO>());
                 return Ok(new { message = status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //[Authorize]
+        [HttpGet("RequestHelp")]
+        public async Task<ActionResult<List<ResponseHelpModel>>> GetAllHelpRequests(Guid fileId)
+        {
+            try
+            {
+                var requests = await _sendMailService.ShowAllHelpRequests();
+                return Ok(requests.Adapt<List<ResponseHelpModel>>());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("RequestHelp")]
+        public async Task<IActionResult> UpdatehelpRequest(ResponseHelpModel requestData)
+        {
+            try
+            {
+                await _sendMailService.UpdateHelpRequest(requestData.Adapt<ResponseHelpDTO>());
+                return Ok();
             }
             catch (Exception ex)
             {

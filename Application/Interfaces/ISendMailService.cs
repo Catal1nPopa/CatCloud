@@ -7,5 +7,7 @@ namespace Application.Interfaces
     {
         Task<bool> SendReuqestMoreSpace();
         Task<bool> RequestHelp(RequestHelpDTO requestHelp);
+        Task<List<ResponseHelpDTO>> ShowAllHelpRequests();
+        Task UpdateHelpRequest(ResponseHelpDTO helpRequest);
     }
 }
