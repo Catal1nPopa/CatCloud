@@ -8,5 +8,6 @@
         public double TotalStorage { get; set; }
         public double AvailableStorage { get; set; }
         public DateTime Added { get; set; }
+        public bool Enabled { get; set; }
     }
 }

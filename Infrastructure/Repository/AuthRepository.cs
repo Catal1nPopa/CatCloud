@@ -169,5 +169,26 @@ namespace Infrastructure.Repository
 
             return usersNotShared;
         }
+
+        public async Task UpdateUser(UserInfoEntity userEntity)
+        {
+            try
+            {
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == userEntity.Id);
+
+            double UsedMemory = user.TotalStorage - user.AvailableStorage; 
+            user.AvailableStorage = userEntity.TotalStorage - UsedMemory;
+            user.Email = userEntity.Email;
+            user.TotalStorage = userEntity.TotalStorage;
+            user.Enabled = userEntity.Enabled;
+
+            await _dbContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Eroare la actualizare utilizator, {ex.Message}");
+            }
+        }
     }
 }

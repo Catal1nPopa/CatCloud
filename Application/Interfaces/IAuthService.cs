@@ -9,6 +9,7 @@ namespace Application.Interfaces
         Task DeleteUser(Guid userId);
         Task<List<UserInfoDTO>> GetUsers();
         Task<List<UserInfoDTO>> GetUsersToShareFile(Guid fileId);
+        Task UpdateUser(UserInfoDTO user);
         Task<UserInfoDTO> GetUser();
     }
 }

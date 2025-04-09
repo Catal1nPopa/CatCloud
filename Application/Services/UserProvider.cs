@@ -17,9 +17,15 @@ namespace Application.Services
         {
             try
             {
-                string id = _context.HttpContext.User.Claims
-                       .FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier).Value;
-            return Guid.Parse(id);
+                var claim = _context?.HttpContext?.User?.Claims
+                .FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier);
+
+                if (claim == null || string.IsNullOrWhiteSpace(claim.Value))
+                {
+                    throw new UnauthorizedAccessException("User ID claim is missing or session has expired.");
+                }
+
+                return Guid.Parse(claim.Value);
             }
             catch (Exception ex)
             {
@@ -29,28 +35,28 @@ namespace Application.Services
 
         public string GetName()
         {
-            try
+            var claim = _context?.HttpContext?.User?.Claims
+                .FirstOrDefault(i => i.Type == ClaimTypes.Name);
+
+            if (claim == null)
             {
-            return _context.HttpContext.User.Claims
-                       .FirstOrDefault(i => i.Type == ClaimTypes.Name).Value;
+                throw new UnauthorizedAccessException("Name claim is missing or session has expired.");
             }
-            catch(Exception ex)
-            {
-                throw new UnauthorizedAccessException();
-            }
+
+            return claim.Value;
         }
 
         public string GetEmail()
         {
-            try
+            var claim = _context?.HttpContext?.User?.Claims
+                .FirstOrDefault(i => i.Type == ClaimTypes.Email);
+
+            if (claim == null)
             {
-            return _context.HttpContext.User.Claims
-                       .FirstOrDefault(i => i.Type == ClaimTypes.Email).Value;
+                throw new UnauthorizedAccessException("Email claim is missing or session has expired.");
             }
-            catch(Exception)
-            {
-                throw new UnauthorizedAccessException();
-            }
+
+            return claim.Value;
         }
     }
 }
