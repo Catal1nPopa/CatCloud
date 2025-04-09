@@ -46,21 +46,26 @@ namespace Infrastructure.Repository
 
         public async Task<UserEntity> GetUserByUsername(string username)
         {
-            //try
-            //{
-            var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Username == username);
+            var user = await _dbContext.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(user => user.Username == username);
             return user;
-            //}
-            //catch (NpgsqlException exception)
-            //{
-            //    LoggerHelper.LogInformation($"Eroare la obtinerea din baza de date a utilizatorului - {username}, exception - {exception}");
-            //    throw new InvalidOperationException($"Eroare la obtinerea din baza de date a utilizatorului : {username}", exception);
-            //}
-            //catch (Exception exception)
-            //{
-            //    LoggerHelper.LogInformation($"Eroare la obtinerea utilizator - {username}, exception - {exception}");
-            //    throw new ApplicationException($"Eroare la obtinerea utilizator : {username}");
-            //}
+        }
+
+        public async Task<List<string>> GetUserRole(Guid userId)
+        {
+            try
+            {
+                var userRoles = await _dbContext.UserRoles.Where(ur => ur.UserId == userId)
+                        .Select(ur => ur.Role.Name) 
+                        .ToListAsync();
+                return userRoles;
+            }
+            catch(Exception exception)
+            {
+                throw new Exception($"{exception.Message}");
+            }
         }
 
         public async Task<UserEntity> GetUserByEmail(string email)

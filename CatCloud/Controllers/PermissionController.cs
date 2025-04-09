@@ -86,7 +86,7 @@ namespace CatCloud.Controllers
         }
 
         [HttpPost("users/{userId}/roles")]
-        public async Task<IActionResult> AssignRoleToUser(Guid userId, [FromBody] string roleName)
+        public async Task<IActionResult> AssignRoleToUser(Guid userId, string roleName)
         {
             try
             {
