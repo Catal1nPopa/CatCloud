@@ -13,5 +13,6 @@ namespace Domain.Interfaces
         Task<List<GroupEntity>> GetUserGroups(Guid userId);
         Task<List<UserEntity>> GetGroupUsers(Guid groupId);
         Task<List<GroupEntity>> GetGroupsNotSharedWithFile(Guid fileId, Guid userId);
+        Task<List<UserEntity>> GetUsersToLink(Guid groupId);
     }
 }

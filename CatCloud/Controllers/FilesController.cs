@@ -40,7 +40,7 @@ namespace CatCloud.Controllers
             try
             {
                 await _filesService.DeleteFile(fileId);
-                return Ok(new { Message = $"Fisierul {fileId} sters cu succes" });
+                return Ok(new { Message = $"Fisierul a fost sters" });
             }
             catch (Exception ex)
             {
@@ -65,7 +65,7 @@ namespace CatCloud.Controllers
             try
             {
                 await _filesService.ShareFileWithGroups(shareFileModel.fileId, shareFileModel.objectIds);
-                return Ok(new { Message = $"Fisierul {shareFileModel.fileId} a fost partajat cu utilizatorii: {shareFileModel.objectIds}" });
+                return Ok(new { Message = $"Fisierul a fost partajat cu succes" });
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
@@ -174,9 +174,7 @@ namespace CatCloud.Controllers
                 var encodedFileName = Uri.EscapeDataString(file.FileName); 
                 Response.Headers["Content-Disposition"] = $"attachment; filename*=UTF-8''{encodedFileName}";
 
-                var stream = file.File.OpenReadStream(); 
-
-                return File(stream, file.ContentType, file.FileName, enableRangeProcessing: true);
+                return File(file.bytes, file.ContentType, file.FileName, enableRangeProcessing: true);
             }
             catch (Exception ex)
             {

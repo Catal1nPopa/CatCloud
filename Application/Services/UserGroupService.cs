@@ -15,7 +15,7 @@ namespace Application.Services
         private readonly IUserProvider _userProvider = userProvider;
         public async Task CreateGroup(GroupDTO groupEntity)
         {
-            //groupEntity.OwnerId = _userProvider.GetUserId();
+            groupEntity.OwnerId = _userProvider.GetUserId();
             groupEntity.Created = DateTime.UtcNow;
             await _groupRepository.CreateGroup(groupEntity.Adapt<GroupEntity>());
             LoggerHelper.LogWarning($"Grup nou creat {groupEntity.Name}");
@@ -58,6 +58,12 @@ namespace Application.Services
         public async Task UnlinkUserFromGroup(UserToGroupDTO data)
         {
             await _groupRepository.UnlinkUserFromGroup(data.Adapt<LinkUserToGroupEntity>());
+        }
+
+        public async Task<List<UserInfoDTO>> GetUsersToLink(Guid groupId)
+        {
+            var users = await _groupRepository.GetUsersToLink(groupId);
+            return users.Adapt<List<UserInfoDTO>> ();
         }
     }
 }

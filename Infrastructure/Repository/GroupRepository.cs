@@ -10,6 +10,9 @@ namespace Infrastructure.Repository
         private readonly CloudDbContext _dbContext = dbContext;
         public async Task CreateGroup(GroupEntity groupEntity)
         {
+            try
+            {
+
             if (await _dbContext.Groups.AnyAsync(g => g.Name == groupEntity.Name))
             {
                 throw new Exception($"Eroare la creare grup, grup existent");
@@ -25,6 +28,11 @@ namespace Infrastructure.Repository
 
             _dbContext.Groups.Add(groupEntity);
             await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
         }
 
         public async Task DeleteGroup(Guid groupId)
@@ -124,18 +132,40 @@ namespace Infrastructure.Repository
 
         public async Task UnlinkUserFromGroup(LinkUserToGroupEntity data)
         {
-            //var userGroup = await _dbContext.UserGroups
-            //    .FirstOrDefaultAsync(ug => ug.UserId == data.UserId && ug.GroupId == data.GroupId);
-            //if (userGroup != null)
-            //{
-            //    _dbContext.UserGroups.Remove(userGroup);
-            //    await _dbContext.SaveChangesAsync();
-            //}
-            //else
-            //{
-            //    throw new Exception("Utilizatorul nu este asociat cu acest grup.");
-            //}
-            throw new NotImplementedException();
+            try
+            {
+
+            var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == data.GroupId);
+            if (group == null)
+            {
+                throw new Exception("Grupul nu există.");
+            }
+
+            var userGroups = await _dbContext.UserGroups
+                .Where(ug => data.UserIds.Contains(ug.UserId) && ug.GroupId == data.GroupId)
+                .ToListAsync();
+
+            if (!userGroups.Any())
+            {
+                throw new Exception("Niciun utilizator de eliminat nu a fost găsit în acest grup.");
+            }
+
+            var usersToRemove = userGroups
+                .Where(ug => ug.UserId != group.OwnerId)
+                .ToList();
+
+            if (!usersToRemove.Any())
+            {
+                throw new Exception("Nu poți elimina owner-ul grupului din grup.");
+            }
+
+            _dbContext.UserGroups.RemoveRange(usersToRemove);
+            await _dbContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
         }
 
         public async Task<List<GroupEntity>> GetUserGroups(Guid userId)
@@ -193,6 +223,24 @@ namespace Infrastructure.Repository
                 .Where(g => userGroupIds.Contains(g.Id) && !sharedGroupIds.Contains(g.Id))
                 .ToListAsync();
             return availableGroups;
+        }
+
+        public async Task<List<UserEntity>> GetUsersToLink(Guid groupId)
+        {
+            try
+            {
+                var usersToLink = await _dbContext.Users
+                    .Where(u => !_dbContext.UserGroups
+                    .Where(g => g.GroupId == groupId)
+                    .Select(g => g.UserId)
+                    .Contains(u.Id))
+                    .ToListAsync();
+                return usersToLink;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
         }
     }
 }
