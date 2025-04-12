@@ -61,54 +61,55 @@ namespace Application.Services
 
         public async Task<List<GetFilesDTO>> GetUserFiles(Guid userId)
         {
-            var userFilesPath = await _fileRepository.GetUserFiles(userId);
-            var files = await GetDecryptedFiles(userFilesPath);
-            return files;
+            //var userFilesPath = await _fileRepository.GetUserFiles(userId);
+            //var files = await GetDecryptedFiles(userFilesPath);
+            //return files;
+            throw new NotImplementedException();
         }
 
         public async Task CopyFile(CopyFileDTO fileDTO)
         {
-            var fileData = await _fileRepository.GetFileById(fileDTO.fileId, fileDTO.AuthorId);
-            var fileEntity = fileData;
-            var fileRecord = new GetFilesDTO { };
-            if (File.Exists(fileData.FilePath))
-            {
-                FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-                byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath, fileEntity.UploadedAt);
-                var memoryStream = new MemoryStream(decryptedBytes);
+            //var fileData = await _fileRepository.GetFileById(fileDTO.fileId, fileDTO.AuthorId);
+            //var fileEntity = fileData;
+            //var fileRecord = new GetFilesDTO { };
+            //if (File.Exists(fileData.FilePath))
+            //{
+            //    FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
+            //    byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath, fileEntity.UploadedAt);
+            //    var memoryStream = new MemoryStream(decryptedBytes);
 
-                fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
-                {
-                    Headers = new HeaderDictionary(),
-                    ContentType = "application/octet-stream"
-                };
-            }
+            //    fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
+            //    {
+            //        Headers = new HeaderDictionary(),
+            //        ContentType = "application/octet-stream"
+            //    };
+            //}
 
-            var user = await _authRepository.GetUserById(fileDTO.UserId);
-            //fileEntity.UploadedByUser = user;
-            fileEntity.UploadedByUserId = fileDTO.UserId;
-            fileEntity.UploadedAt = DateTime.UtcNow;
+            //var user = await _authRepository.GetUserById(fileDTO.UserId);
+            ////fileEntity.UploadedByUser = user;
+            //fileEntity.UploadedByUserId = fileDTO.UserId;
+            //fileEntity.UploadedAt = DateTime.UtcNow;
 
-            await UploadFiles(fileRecord.File, fileEntity.Adapt<FilesDTO>());
+            //await UploadFiles(fileRecord.File, fileEntity.Adapt<FilesDTO>());
+            throw new NotImplementedException();
         }
 
         public async Task<List<GetFilesDTO>> GetFilesSharedWithGroup(Guid groupId)
         {
-            var groupFilesPath = await _fileRepository.GetFilesSharedWithGroup(groupId);
-            var files = await GetDecryptedFiles(groupFilesPath);
-            return files;
+            throw new NotImplementedException();
+            //var groupFilesPath = await _fileRepository.GetFilesSharedWithGroup(groupId);
+            //var files = await GetDecryptedFiles(groupFilesPath);
+            //return files;
         }
         public async Task<List<GetFilesDTO>> GetFilesSharedWithUser(Guid userId)
         {
-            var userFilesPath = await _fileRepository.GetFilesSharedWithUser(userId);
-            var files = await GetDecryptedFiles(userFilesPath);
-            return files;
+            //var userFilesPath = await _fileRepository.GetFilesSharedWithUser(userId);
+            //var files = null;await GetDecryptedFiles(userFilesPath);
+            //return files;
+            throw new NotImplementedException();
         }
-        private async Task<List<GetFilesDTO>> GetDecryptedFiles(List<FileEntity> fileEntities)
+        private async Task<GetFilesDTO> GetDecryptedFiles(FileEntity file)
         {
-            var fileRecords = new List<GetFilesDTO>();
-            foreach (var file in fileEntities)
-            {
                 if (File.Exists(file.FilePath))
                 {
                     var fileRecord = new GetFilesDTO
@@ -122,24 +123,10 @@ namespace Application.Services
 
                     FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
                     byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath, file.UploadedAt);
-                    //var memoryStream = new MemoryStream(decryptedBytes);
-
-                    //fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, file.FileName)
-                    //{
-                    //    Headers = new HeaderDictionary(),
-                    //    ContentType = "application/octet-stream"
-                    //};
-
-                    string decryptedFilePath = Path.Combine(Path.GetTempPath(), file.FileName);
-                    await File.WriteAllBytesAsync(decryptedFilePath, decryptedBytes);
-
-                    fileRecord.File = new FormFile(new FileStream(decryptedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), 0, new FileInfo(decryptedFilePath).Length, null, file.FileName);
-
-
-                    fileRecords.Add(fileRecord);
+                    fileRecord.bytes = decryptedBytes;
+                    return fileRecord;
                 }
-            }
-            return fileRecords;
+            return null;
         }
         private string GetStoragePath(long fileSize)
         {
@@ -224,15 +211,13 @@ namespace Application.Services
         {
             var userId = _userProvider.GetUserId();
             var file = await _fileRepository.GetFileById(fileId, userId);
-            List<FileEntity> filesToDecrypt = new List<FileEntity>();
-            filesToDecrypt.Add(file);
-            var fileDecrypted = await GetDecryptedFiles(filesToDecrypt);
+            var fileDecrypted = await GetDecryptedFiles(file);
 
             if (fileDecrypted == null || !File.Exists(file.FilePath))
             {
                 throw new Exception("File not found.");
             }
-            return fileDecrypted.First();
+            return fileDecrypted;
         }
 
         public async Task<List<GroupFilesMetadataDTO>> GetGroupFilesMetadata(Guid groupId)

@@ -9,7 +9,8 @@ namespace Application.DTOs.Files
         public long FileSize { get; set; }
         public DateTime UploadedAt { get; set; }
         public Guid UploadedByUserId { get; set; }
-        public IFormFile File { get; set; }
+        //public IFormFile File { get; set; }
         public string ContentType { get; set; }
+        public byte[] bytes { get; set; }
     }
 }
