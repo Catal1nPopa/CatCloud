@@ -183,6 +183,30 @@ namespace CatCloud.Controllers
         }
 
         [Authorize]
+        [HttpGet("filePreview")]
+        public async Task<IActionResult> PreviewFile(Guid fileId)
+        {
+            try
+            {
+                var file = await _filesService.DownloadFile(fileId);
+                if (file == null)
+                {
+                    return NotFound("File not found.");
+                }
+
+                var encodedFileName = Uri.EscapeDataString(file.FileName);
+                Response.Headers["Content-Disposition"] = $"inline; filename*=UTF-8''{encodedFileName}";
+
+                return File(file.bytes, file.ContentType, file.FileName, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error previewing file: {ex.Message}");
+            }
+        }
+
+
+        [Authorize]
         [HttpGet("latestUplaodedFiles")]
         public async Task<ActionResult<List<FileMetadata>>> GetLatestUplaodedFiles()
         {
