@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Auth;
+using Domain.Entities.Chat;
 using Domain.Entities.Files;
 using Domain.Entities.Folder;
 using Domain.Entities.Mail;
@@ -24,6 +25,7 @@ namespace Infrastructure
         public DbSet<FileGroupShareEntity> FileGroupShares { get; set; }
         public DbSet<FolderEntity> Folders { get; set; }
         public DbSet<RequestHelpEntity> RequestHelps { get; set; }
+        public DbSet<ChatEntity> ChatMessages { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -100,7 +102,21 @@ namespace Infrastructure
                 .HasOne(r => r.User)
                 .WithMany(u => u.RequestHelps)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<ChatEntity>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.ChatMessages)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ChatEntity>()
+                .HasOne(c => c.Group)
+                .WithMany(g => g.ChatMessages)
+                .HasForeignKey(c => c.GroupId)
+                .OnDelete(DeleteBehavior.SetNull);
+
 
             base.OnModelCreating(modelBuilder);
         }

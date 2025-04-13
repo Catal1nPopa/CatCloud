@@ -17,6 +17,7 @@ namespace Infrastructure.Configuration
             services.AddScoped<IFolderRepository, FolderRepository>();
             services.AddScoped<IStatisticsRepository, StatisticsRepository>();
             services.AddScoped<IHelpRepository, HelpRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
 
             services.AddScoped<CloudDbContext>();
 

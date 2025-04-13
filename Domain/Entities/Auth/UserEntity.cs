@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Files;
+﻿using Domain.Entities.Chat;
+using Domain.Entities.Files;
 using Domain.Entities.Folder;
 using Domain.Entities.Mail;
 using Domain.Entities.Permission;
@@ -45,6 +46,7 @@ namespace Domain.Entities.Auth
         public ICollection<UserGroupPermissionsEntity> UserGroupPermissions { get; set; }
         public ICollection<FolderEntity> Folders { get; set; }
         public ICollection<RequestHelpEntity> RequestHelps { get; set; } = new List<RequestHelpEntity>();
+        public ICollection<ChatEntity> ChatMessages { get; set; } = new List<ChatEntity>();
 
     }
 }

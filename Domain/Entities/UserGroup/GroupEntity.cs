@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Auth;
+using Domain.Entities.Chat;
 using Domain.Entities.Files;
 using Domain.Entities.Permission;
 
@@ -17,5 +18,7 @@ namespace Domain.Entities.UserGroup
         public ICollection<UserEntity> UserEntities { get; set; }
         public ICollection<FileEntity> UploadedFiles { get; set; }
         public ICollection<UserGroupPermissionsEntity> UserGroupPermissions { get; set; }
+        public ICollection<ChatEntity> ChatMessages { get; set; } = new List<ChatEntity>();
+
     }
 }
