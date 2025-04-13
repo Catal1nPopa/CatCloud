@@ -11,5 +11,6 @@ namespace Application.Interfaces
         Task<List<UserInfoDTO>> GetUsersToShareFile(Guid fileId);
         Task UpdateUser(UserInfoDTO user);
         Task<UserInfoDTO> GetUser();
+        Task<UserInfoDTO> GetUserById(Guid userId);
     }
 }

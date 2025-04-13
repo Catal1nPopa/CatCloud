@@ -130,5 +130,11 @@ namespace Application.Services
         {
             await _authRepository.UpdateUser(user.Adapt<UserInfoEntity>());
         }
+
+        public async Task<UserInfoDTO> GetUserById(Guid userId)
+        {
+            var user = await _authRepository.GetUserById(userId);
+            return user.Adapt<UserInfoDTO>();
+        }
     }
 }
