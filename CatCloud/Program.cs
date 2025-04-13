@@ -1,5 +1,6 @@
 using Application.Configuration;
 using Application.Configuration.ExceptionConfig;
+using CatCloud.ChatHub;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -18,7 +19,7 @@ try
         options.MultipartBodyLengthLimit = 6L * 1024 * 1024 * 1024; // 6 GB
     });
 
-
+    builder.Services.AddSignalR();
     builder.Services.ApplicationInjection(builder.Configuration);
 
     builder.Services.AddCors(options =>
@@ -76,6 +77,8 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+
+    app.MapHub<ChatHub>("/chatHub");
 
     Log.Information("Aplicatia a pornit cu succes si ruleaza...");
 
