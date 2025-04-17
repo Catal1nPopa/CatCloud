@@ -8,6 +8,7 @@ namespace CatCloud.ChatHub
     public interface IChatClient
     {
         public Task ReceiveMessage(string userName, string message);
+        Task UsersOnline(List<string> usernames);
     }
     public class ChatHub(IAuthService authService, IChatService chatService) : Hub<IChatClient>
     {
@@ -29,6 +30,16 @@ namespace CatCloud.ChatHub
             {
                 await Clients.Caller.ReceiveMessage(msg.Username, msg.Message);
             }
+
+            var usersOnline = _connections
+                .Where(x => x.Value.ChatRoom == connection.ChatRoom)
+                .Select(async x => (await _authService.GetUserById(x.Value.UserId)).Username)
+                .Select(t => t.Result)
+                .Distinct()
+                .ToList();
+
+            await Clients.Group(connection.ChatRoom.ToString())
+                .UsersOnline(usersOnline);
 
         }
 
@@ -70,6 +81,16 @@ namespace CatCloud.ChatHub
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.ChatRoom.ToString());
                 await Clients.Group(connection.ChatRoom.ToString())
                     .ReceiveMessage("", $"{user.Username} a părăsit chat-ul");
+
+                var usersOnline = _connections
+                    .Where(x => x.Value.ChatRoom == connection.ChatRoom)
+                    .Select(async x => (await _authService.GetUserById(x.Value.UserId)).Username)
+                    .Select(t => t.Result)
+                    .Distinct()
+                    .ToList();
+
+                await Clients.Group(connection.ChatRoom.ToString())
+                    .UsersOnline(usersOnline);
             }
 
             await base.OnDisconnectedAsync(exception);

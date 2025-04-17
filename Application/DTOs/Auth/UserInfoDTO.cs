@@ -10,5 +10,6 @@
         public bool EmailConfirmed { get; set; }
         public bool Enabled { get; set; }
         public DateTime Added { get; set; }
+        public List<string> Role { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace CatCloud.Controllers
     {
         private readonly IFilesService _filesService = filesService;
 
+        [Authorize]
         [DisableRequestSizeLimit]
         [RequestSizeLimit(6L * 1024 * 1024 * 1024)]
         [HttpPost("file")]
@@ -34,6 +35,8 @@ namespace CatCloud.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize]
         [HttpDelete("file")]
         public async Task<IActionResult> DeleteFile(Guid fileId)
         {
@@ -48,6 +51,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("shareUsers")]
         public async Task<IActionResult> ShareFileWithUsers(ShareFileModel shareFileModel)
         {
@@ -59,6 +63,7 @@ namespace CatCloud.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
+        [Authorize]
         [HttpPost("shareGroup")]
         public async Task<IActionResult> ShareFileWithGroups(ShareFileModel shareFileModel)
         {
@@ -70,6 +75,7 @@ namespace CatCloud.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
+        [Authorize]
         [HttpPost("copyFile")]
         public async Task<IActionResult> CopyFile([FromBody] CopyFileModel fileModel)
         {
@@ -99,7 +105,7 @@ namespace CatCloud.Controllers
             }
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("groupFilesMetadata")]
         public async Task<ActionResult<List<FileMetadata>>> GetGroupFileMetadata(Guid groupId)
         {
@@ -144,7 +150,7 @@ namespace CatCloud.Controllers
             }
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("userFolderFilesMetadata")]
         public async Task<ActionResult<List<FileMetadata>>> GetUserFolderFileMetadata(Guid folderId)
         {

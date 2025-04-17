@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatCloud.Controllers
@@ -9,6 +10,7 @@ namespace CatCloud.Controllers
     {
         private readonly IPermissionsService _permissionsService = permissionsService;
 
+        //[Authorize]
         [HttpPost("roles")]
         public async Task<IActionResult> AddRole([FromQuery] string roleName)
         {
@@ -16,6 +18,7 @@ namespace CatCloud.Controllers
             return Ok(new { Message = $"rol adaugat {roleName}" });
         }
 
+        [Authorize]
         [HttpDelete("roles/{roleName}")]
         public async Task<IActionResult> DeleteRole(string roleName)
         {
@@ -23,12 +26,14 @@ namespace CatCloud.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpGet("roles")]
         public async Task<ActionResult<List<string>>> GetRoles()
         {
             return Ok(await _permissionsService.GetRoles());
         }
 
+        [Authorize]
         [HttpPost("permissions")]
         public async Task<IActionResult> AddPermission([FromQuery] string permission)
         {
@@ -36,6 +41,7 @@ namespace CatCloud.Controllers
             return Ok(new { Message = $"Permisiune {permission} adaugata" });
         }
 
+        [Authorize]
         [HttpDelete("permissions/{permission}")]
         public async Task<IActionResult> DeletePermission(string permission)
         {
@@ -43,6 +49,7 @@ namespace CatCloud.Controllers
             return Ok(new { Message = $"Permisiune {permission} stearsa" });
         }
 
+        [Authorize]
         [HttpGet("permissions")]
         public async Task<ActionResult<List<string>>> GetPermissions()
         {
@@ -56,6 +63,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("roles/{roleName}/permissions")]
         public async Task<IActionResult> AssignPermissionsToRole(string roleName, [FromBody] List<string> permissions)
         {
@@ -70,6 +78,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("roles/{roleName}/permissions")]
         public async Task<ActionResult<List<string>>> GetRolePermissions(string roleName)
         {
@@ -85,6 +94,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        //[Authorize]
         [HttpPost("users/{userId}/roles")]
         public async Task<IActionResult> AssignRoleToUser(Guid userId, string roleName)
         {
@@ -99,6 +109,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("users/{userId}/roles")]
         public async Task<ActionResult<List<string>>> GetUserRoles(Guid userId)
         {
@@ -113,6 +124,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("users/{userId}/roles/{roleName}")]
         public async Task<IActionResult> RemoveRoleFromUser(Guid userId, string roleName)
         {
@@ -127,6 +139,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("groups/{groupId}/users/{userId}/roles")]
         public async Task<IActionResult> AssignRoleToUserInGroup(Guid groupId, Guid userId, [FromBody] string roleName)
         {
@@ -141,6 +154,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("groups/{groupId}/users/{userId}/roles/{roleName}")]
         public async Task<IActionResult> RemoveRoleFromUserInGroup(Guid groupId, Guid userId, string roleName)
         {
@@ -155,6 +169,7 @@ namespace CatCloud.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("groups/{groupId}/users/{userId}/roles")]
         public async Task<ActionResult<List<string>>> GetUserRolesInGroup(Guid groupId, Guid userId)
         {

@@ -47,7 +47,7 @@ namespace CatCloud.Controllers
             }
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("RequestHelp")]
         public async Task<ActionResult<List<ResponseHelpModel>>> GetAllHelpRequests(Guid fileId)
         {

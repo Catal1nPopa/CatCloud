@@ -22,11 +22,10 @@ namespace CatCloud.Controllers
                 {
                     return Ok(new { token = token }); 
                 }
-                return BadRequest("Credentiale invalide");
+                return BadRequest(new { message = "Credentiale invalide" });
             }
             catch(Exception ex) {
-                throw new Exception(ex.Message);
-                //return BadRequest(new { message = "Eroare la autentificare ${" });
+                return BadRequest(new { message = "Credentiale invalide" });
             }
         }
 

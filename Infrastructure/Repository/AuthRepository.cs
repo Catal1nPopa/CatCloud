@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Auth;
+using Domain.Entities.Permission;
 using Domain.Interfaces;
 using Helper.Serilog;
 using Microsoft.EntityFrameworkCore;
@@ -119,19 +120,34 @@ namespace Infrastructure.Repository
             }
             catch (Exception exception)
             {
-                throw new Exception($"Eroare la stergere utilizator | {userId}");
+                throw new Exception($"Eroare la stergere utilizator | {userId} | {exception}");
             }
         }
 
-        public async Task<List<UserEntity>> GetAllUsers()
+        public async Task<List<UserInfoEntity>> GetAllUsers()
         {
-            var users = await _dbContext.Users.ToListAsync();
+            var users = await _dbContext.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Select(f => new UserInfoEntity
+            {
+                Id = f.Id,
+                Username = f.Username,
+                Email = f.Email,
+                EmailConfirmed = f.EmailConfirmed,
+                TotalStorage = f.TotalStorage,
+                AvailableStorage = f.AvailableStorage,
+                Enabled = f.Enabled,
+                Added = f.Added,
+                Role = f.UserRoles.Select(u => u.Role.Name).ToList()
+            }).ToListAsync();
+
             return users;
         }
 
         public async Task<bool> DecreaseAvailableSize(long fileSize, Guid userId)
         {
-            try
+            try     
             {
                 var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == userId);
                 user.AvailableStorage = user.AvailableStorage - fileSize;
@@ -180,15 +196,33 @@ namespace Infrastructure.Repository
             try
             {
 
-            var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == userEntity.Id);
+                var user = await _dbContext.Users
+                   .Include(u => u.UserRoles)
+                    .FirstOrDefaultAsync(u => u.Id == userEntity.Id); 
+                if (user == null)
+                    throw new Exception("Utilizatorul nu a fost găsit.");
 
-            double UsedMemory = user.TotalStorage - user.AvailableStorage; 
-            user.AvailableStorage = userEntity.TotalStorage - UsedMemory;
-            user.Email = userEntity.Email;
-            user.TotalStorage = userEntity.TotalStorage;
-            user.Enabled = userEntity.Enabled;
+                double UsedMemory = user.TotalStorage - user.AvailableStorage; 
+                user.AvailableStorage = userEntity.TotalStorage - UsedMemory;
+                user.Email = userEntity.Email;
+                user.TotalStorage = userEntity.TotalStorage;
+                user.Enabled = userEntity.Enabled;
 
-            await _dbContext.SaveChangesAsync();
+                _dbContext.UserRoles.RemoveRange(user.UserRoles);
+
+                var rolesFromDb = await _dbContext.Roles
+                    .Where(r => userEntity.Role.Contains(r.Name))
+                    .ToListAsync();
+
+                foreach (var role in rolesFromDb)
+                {
+                    user.UserRoles.Add(new UserRoleEntity
+                    {
+                        UserId = user.Id,
+                        RoleId = role.Id
+                    });
+                }
+                await _dbContext.SaveChangesAsync();
             }
             catch(Exception ex)
             {
