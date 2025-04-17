@@ -12,7 +12,8 @@ namespace CatCloud.Controllers
     {
         private readonly IStatisticsService _statisticsService = statisticsService;
         private readonly IFilesService _fileService = filesService;
-        
+
+        [Authorize]
         [HttpGet("StorageDetails")]
         public async Task<ActionResult<StorageDetailsModel>> GetStorageDetails()
         {

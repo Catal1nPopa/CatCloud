@@ -72,7 +72,7 @@ namespace Infrastructure
                 .HasOne(g => g.Owner)
                 .WithMany()
                 .HasForeignKey(g => g.UploadedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<FileEntity>()
                 .HasMany(f => f.UserEntities)
@@ -84,14 +84,12 @@ namespace Infrastructure
                 .WithMany(u => u.UploadedFiles)
                 .UsingEntity<FileGroupShareEntity>(f => f.HasKey(fg => new { fg.FileId, fg.GroupId }));
 
-            //relatia user - folder unu la multi 
             modelBuilder.Entity<FolderEntity>()
                 .HasOne(owner => owner.Owner)
                 .WithMany(folders => folders.Folders)
                 .HasForeignKey(fkey => fkey.OwnerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //relatia folder - file unu la multi
             modelBuilder.Entity<FileEntity>()
                 .HasOne(folder => folder.Folder)
                 .WithMany(folder => folder.Files)
