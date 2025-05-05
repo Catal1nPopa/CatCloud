@@ -9,5 +9,8 @@
         public double TotalStorage { get; set; }
         public double AvailableStorage { get; set; }
         public DateTime Added { get; set; }
+        public string? EmailConfirmationToken { get; set; }
+        public DateTime? EmailConfirmationTokenExpires { get; set; }
+
     }
 }
