@@ -25,7 +25,7 @@ namespace CatCloud.Controllers
                 return BadRequest(new { message = "Credentiale invalide" });
             }
             catch(Exception ex) {
-                return BadRequest(new { message = "Credentiale invalide" });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -92,7 +92,7 @@ namespace CatCloud.Controllers
         public async Task<IActionResult> UpdateUser(UserInfoModel userData)
         {
             try
-                {
+            {
                 userData.TotalStorage = Math.Round(userData.TotalStorage * (1024.0 * 1024.0), 2);
                 userData.AvailableStorage = Math.Round(userData.AvailableStorage * (1024.0 * 1024.0), 2);
                 await _authService.UpdateUser(userData.Adapt<UserInfoDTO>());
@@ -101,6 +101,21 @@ namespace CatCloud.Controllers
             catch(Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        
+        
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
+        {
+            try
+            {
+                await _authService.ConfirmEmail(token);
+                return Redirect("http://localhost:3001/email-confirmed");
+            }
+            catch (Exception ex)
+            {
+                return Redirect($"http://localhost:3001/email-error"); 
             }
         }
     }

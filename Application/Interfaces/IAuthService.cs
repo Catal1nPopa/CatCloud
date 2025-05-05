@@ -12,5 +12,6 @@ namespace Application.Interfaces
         Task UpdateUser(UserInfoDTO user);
         Task<UserInfoDTO> GetUser();
         Task<UserInfoDTO> GetUserById(Guid userId);
+        Task ConfirmEmail(string token);
     }
 }

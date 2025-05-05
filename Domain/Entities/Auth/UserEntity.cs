@@ -20,6 +20,8 @@ namespace Domain.Entities.Auth
         public double TotalStorage { get; set; }
         public double AvailableStorage { get; set; }
         public DateTime Added { get; set; }
+        public string? EmailConfirmationToken { get; set; }
+        public DateTime? EmailConfirmationTokenExpires { get; set; }
 
         public UserEntity() { }
         public bool CheckPassword(string password)
@@ -28,7 +30,7 @@ namespace Domain.Entities.Auth
             return CryptographicOperations.FixedTimeEquals(hashToCompare, Convert.FromHexString(Password));
         }
 
-        public UserEntity(string username, string password, string salt, string email, bool emailConf, double totalSpace, double availableSpace, DateTime added)
+        public UserEntity(string username, string password, string salt, string email, bool emailConf, double totalSpace, double availableSpace, DateTime added, string? emailConfirmationToken, DateTime? emailConfirmationTokenExpires)
         {
             Username = username;
             Password = password;
@@ -38,6 +40,8 @@ namespace Domain.Entities.Auth
             Email = email;
             AvailableStorage = availableSpace;
             Added = added;
+            EmailConfirmationToken = emailConfirmationToken;
+            EmailConfirmationTokenExpires = emailConfirmationTokenExpires;
         }
 
         public ICollection<UserRoleEntity> UserRoles { get; set; } = new List<UserRoleEntity>();

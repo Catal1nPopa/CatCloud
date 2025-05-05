@@ -191,6 +191,27 @@ namespace Infrastructure.Repository
             return usersNotShared;
         }
 
+        public async Task ConfirmEmail(string token)
+        {
+            try
+            {
+                var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.EmailConfirmationToken == token);
+                if (user == null || user.EmailConfirmationTokenExpires < DateTime.UtcNow)
+                {
+                    throw new Exception("Token invalid sau expirat.");
+                }
+                user.EmailConfirmed = true;
+                user.EmailConfirmationToken = null;
+                user.EmailConfirmationTokenExpires = null;
+                
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erroare confirmare email - {token}");
+            }
+        }
+
         public async Task UpdateUser(UserInfoEntity userEntity)
         {
             try

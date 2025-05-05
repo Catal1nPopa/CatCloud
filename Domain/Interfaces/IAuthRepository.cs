@@ -13,5 +13,6 @@ namespace Domain.Interfaces
         Task<bool> DecreaseAvailableSize(long fileSize, Guid userId);
         Task<bool> IncreaseAvailableSize(long fileSize, Guid userId);
         Task<List<UserEntity>> GetUsersNotSharedWithFile(Guid fileId, Guid currentUserId);
+        Task ConfirmEmail(string token);
     }
 }
