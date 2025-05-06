@@ -25,12 +25,12 @@ namespace CatCloud.Controllers
         [DisableRequestSizeLimit]
         [RequestSizeLimit(6L * 1024 * 1024 * 1024)]
         [HttpPost("file")]
-        public async Task<IActionResult> UploadFile(IFormFile userFile)
+        public async Task<IActionResult> UploadFile([FromForm] IFormFile userFile, [FromForm] bool shouldEncrypt)
         {
             try
             {
                 var fileMetadata = new FileUploadModel(
-                    userFile.FileName, DateTime.UtcNow, userFile.Length, userFile.ContentType);
+                    userFile.FileName, DateTime.UtcNow, userFile.Length, userFile.ContentType, shouldEncrypt);
                 await _filesService.UploadFiles(userFile, fileMetadata.Adapt<FilesDTO>());
                 return Ok(new { Message = $"Fisierul {userFile.FileName} incarcat cu succes" });
             }

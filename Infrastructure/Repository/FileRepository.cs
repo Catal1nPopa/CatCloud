@@ -195,6 +195,7 @@ namespace Infrastructure.Repository
                 FileSize = f.FileSize,
                 UploadedAt = f.UploadedAt,
                 ContentType = f.ContentType,
+                ShouldEncrypt = f.ShouldEncrypt,
                 SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
                 SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
             })
@@ -235,6 +236,7 @@ namespace Infrastructure.Repository
                     FileSize = f.FileSize,
                     UploadedAt = f.UploadedAt,
                     ContentType = f.ContentType,
+                    ShouldEncrypt = f.ShouldEncrypt,
                     SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
                     SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
                 })
@@ -277,6 +279,7 @@ namespace Infrastructure.Repository
                     FileSize = f.FileSize,
                     UploadedAt = f.UploadedAt,
                     ContentType = f.ContentType,
+                    ShouldEncrypt = f.ShouldEncrypt,
                     SharedWithUsers = f.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
                     SharedWithGroups = f.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
                 })
@@ -315,6 +318,7 @@ namespace Infrastructure.Repository
                         FileSize = fu.File.FileSize,
                         UploadedAt = fu.File.UploadedAt,
                         ContentType = fu.File.ContentType,
+                        ShouldEncrypt = fu.File.ShouldEncrypt,
                         SharedWithUsers = fu.File.SharedWithUsers.Select(swu => swu.User.Email).ToList(),
                         SharedWithGroups = fu.File.SharedWithGroups.Select(swg => swg.Group.Name).ToList()
                     })

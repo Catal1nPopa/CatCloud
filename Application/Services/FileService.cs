@@ -50,12 +50,23 @@ namespace Application.Services
             {
                 filePath = Path.Combine(userFolderPath, $"{Path.GetFileNameWithoutExtension(filesDTO.FileName)} ({count++}){Path.GetExtension(filesDTO.FileName)}");
             }
-
             filesDTO.FilePath = filePath;
-            FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-            var fileSize = await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId, filesDTO.UploadedAt);
-            filesDTO.FileSize = fileSize;
-            if (await _authRepository.DecreaseAvailableSize(fileSize, userId))
+
+            if (filesDTO.ShouldEncrypt)
+            {
+                FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
+                var fileSize = await encryptionService.EncryptFileAsync(file, filePath, filesDTO.UploadedByUserId, filesDTO.UploadedAt);
+                filesDTO.FileSize = fileSize;   
+            }
+            else
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+            }
+            
+            if (await _authRepository.DecreaseAvailableSize(filesDTO.FileSize, userId))
             {
                 await _fileRepository.UploadFile(filesDTO.Adapt<FileEntity>());
             }
@@ -112,24 +123,31 @@ namespace Application.Services
         // }
         private async Task<GetFilesDTO> GetDecryptedFiles(FileEntity file)
         {
-                if (File.Exists(file.FilePath))
-                {
-                    var fileRecord = new GetFilesDTO
-                    {
-                        UploadedByUserId = file.UploadedByUserId,
-                        FileName = file.FileName,
-                        FileSize = file.FileSize,
-                        UploadedAt = file.UploadedAt,
-                        ContentType = file.ContentType
-                    };
+            if (!File.Exists(file.FilePath))
+                return null;
 
-                    FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-                    byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath, file.UploadedAt);
-                    fileRecord.bytes = decryptedBytes;
-                    return fileRecord;
-                }
-            return null;
+            var fileRecord = new GetFilesDTO
+            {
+                UploadedByUserId = file.UploadedByUserId,
+                FileName = file.FileName,
+                FileSize = file.FileSize,
+                UploadedAt = file.UploadedAt,
+                ContentType = file.ContentType
+            };
+
+            if (file.ShouldEncrypt)
+            {
+                FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
+                byte[] decryptedBytes = await encryptionService.DecryptFileAsync(file.FilePath, file.UploadedAt);
+                fileRecord.bytes = decryptedBytes;
+            }
+            else
+            {
+                fileRecord.bytes = await File.ReadAllBytesAsync(file.FilePath);
+            }
+            return fileRecord;
         }
+
         private async Task<string> GetStoragePath(long fileSize)
         {
             try
