@@ -152,7 +152,33 @@ namespace Application.Services
         {
             await _authRepository.ConfirmEmail(token);
         }
-        
+
+        public async Task RequestResetPassword(string userEmail)
+        {
+            var user = await _authRepository.GetUserByEmail(userEmail);
+            var token = user.Id;
+            var confirmationLink = $"https://localhost:3001/reset-password?token={token}";
+            var body = $@"
+    <div style='font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;'>
+        <h2 style='color: #333;'>Salut {user.Username},</h2>
+        <p style='font-size: 16px; color: #555;'>Mulțumim că utilizați <strong>Cat Storage</strong>.</p>
+        <p style='font-size: 16px; color: #555;'>Pentru a reseta parola de acces, te rugăm să dai click pe butonul de mai jos:</p>
+        <a href='{confirmationLink}' 
+           style='display: inline-block; padding: 12px 24px; margin-top: 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+            Resetare parolă
+        </a>
+        <p style='margin-top: 40px; font-size: 12px; color: #aaa;'>Dacă nu ai cerut acest email, poți să-l ignori în siguranță.</p>
+    </div>";
+            
+            await SendEmail(user.Email, "Reset password", body);
+        }
+
+        public async Task ResetPassword(string userId, string newPassword)
+        {
+            var passwordHash = HashPassword(newPassword, out var salt);
+            await _authRepository.ResetPassword(userId, passwordHash, Convert.ToHexString(salt));
+        }
+
         private async Task SendEmail(string emailToReceive, string subject, string body)
         {
             try

@@ -1,4 +1,6 @@
-﻿namespace CatCloud.Models.File
+﻿using System;
+
+namespace CatCloud.Models.File
 {
     public class CopyFileModel
     {

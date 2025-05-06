@@ -1,4 +1,6 @@
-﻿namespace CatCloud.ChatHub
+﻿using System;
+
+namespace CatCloud.ChatHub
 {
     public class MessageModel
     {

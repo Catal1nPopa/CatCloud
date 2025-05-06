@@ -1,4 +1,7 @@
-﻿namespace CatCloud.Models.User
+﻿using System;
+using System.Collections.Generic;
+
+namespace CatCloud.Models.User
 {
     public class UserInfoModel
     {

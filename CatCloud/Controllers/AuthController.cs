@@ -1,4 +1,7 @@
-﻿using Application.DTOs.Auth;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Application.DTOs.Auth;
 using Application.Interfaces;
 using CatCloud.Models.User;
 using Mapster;
@@ -116,6 +119,34 @@ namespace CatCloud.Controllers
             catch (Exception ex)
             {
                 return Redirect($"http://localhost:3001/email-error"); 
+            }
+        }
+
+        [HttpPost("request-reset-password")]
+        public async Task<IActionResult> ResetPasswordRequest([FromQuery] string userEmail)
+        {
+            try
+            {
+                await _authService.RequestResetPassword(userEmail);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPassword resetPassword)
+        {
+            try
+            {
+                await _authService.ResetPassword(resetPassword.token,resetPassword.newPassword);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

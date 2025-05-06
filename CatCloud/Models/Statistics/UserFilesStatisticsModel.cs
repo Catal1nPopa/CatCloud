@@ -1,4 +1,6 @@
-﻿namespace CatCloud.Models.Statistics
+﻿using System;
+
+namespace CatCloud.Models.Statistics
 {
     public class UserFilesStatisticsModel
     {

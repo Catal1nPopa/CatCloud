@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Files;
+﻿using System;
+using System.Collections.Generic;
+using Application.DTOs.Files;
 using Application.Interfaces;
 using Application.Services;
 using CatCloud.Models.File;
@@ -8,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace CatCloud.Controllers
 {
@@ -75,20 +79,20 @@ namespace CatCloud.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        [Authorize]
-        [HttpPost("copyFile")]
-        public async Task<IActionResult> CopyFile([FromBody] CopyFileModel fileModel)
-        {
-            try
-            {
-                await _filesService.CopyFile(fileModel.Adapt<CopyFileDTO>());
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        // [Authorize]
+        // [HttpPost("copyFile")]
+        // public async Task<IActionResult> CopyFile([FromBody] CopyFileModel fileModel)
+        // {
+        //     try
+        //     {
+        //         await _filesService.CopyFile(fileModel.Adapt<CopyFileDTO>());
+        //         return Ok();
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(ex.Message);
+        //     }
+        // }
 
         [Authorize]
         [HttpGet("userFilesMetadata")]

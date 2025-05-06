@@ -1,4 +1,7 @@
-﻿namespace CatCloud.Models.File
+﻿using System;
+using System.Collections.Generic;
+
+namespace CatCloud.Models.File
 {
     public class ShareFileModel
     {
