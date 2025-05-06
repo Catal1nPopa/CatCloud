@@ -13,7 +13,7 @@ namespace Domain.Entities.Files
         public DateTime UploadedAt { get; set; }
         public Guid UploadedByUserId { get; set; }
         public string ContentType { get; set; }
-
+        public bool ShouldEncrypt { get; set; }
         public UserEntity Owner { get; set; }
 
 
