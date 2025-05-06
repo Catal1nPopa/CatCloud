@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Files;
+﻿using System.Net;
+using System.Net.Mail;
+using Application.DTOs.Files;
 using Application.DTOs.Statistics;
 using Application.DTOs.Storage;
 using Application.DTOs.UserGroup;
@@ -35,7 +37,7 @@ namespace Application.Services
                 throw new Exception($"Nu aveti memorie disponibila pentru acest fisier");
             }
             filesDTO.UploadedByUserId = userId;
-            var storagePath = GetStoragePath(filesDTO.FileSize);
+            var storagePath = await GetStoragePath(filesDTO.FileSize);
             var userFolderPath = Path.Combine(storagePath, "files", filesDTO.UploadedByUserId.ToString());
             if (!File.Exists(userFolderPath))
             {
@@ -59,55 +61,55 @@ namespace Application.Services
             }
         }
 
-        public async Task<List<GetFilesDTO>> GetUserFiles(Guid userId)
-        {
-            //var userFilesPath = await _fileRepository.GetUserFiles(userId);
-            //var files = await GetDecryptedFiles(userFilesPath);
-            //return files;
-            throw new NotImplementedException();
-        }
+        // public async Task<List<GetFilesDTO>> GetUserFiles(Guid userId)
+        // {
+        //     //var userFilesPath = await _fileRepository.GetUserFiles(userId);
+        //     //var files = await GetDecryptedFiles(userFilesPath);
+        //     //return files;
+        //     throw new NotImplementedException();
+        // }
 
-        public async Task CopyFile(CopyFileDTO fileDTO)
-        {
-            //var fileData = await _fileRepository.GetFileById(fileDTO.fileId, fileDTO.AuthorId);
-            //var fileEntity = fileData;
-            //var fileRecord = new GetFilesDTO { };
-            //if (File.Exists(fileData.FilePath))
-            //{
-            //    FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
-            //    byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath, fileEntity.UploadedAt);
-            //    var memoryStream = new MemoryStream(decryptedBytes);
+        // public async Task CopyFile(CopyFileDTO fileDTO)
+        // {
+        //     var fileData = await _fileRepository.GetFileById(fileDTO.fileId, fileDTO.AuthorId);
+        //     var fileEntity = fileData;
+        //     var fileRecord = new GetFilesDTO { };
+        //     if (File.Exists(fileData.FilePath))
+        //     {
+        //         FileEncryptionService encryptionService = new FileEncryptionService(_configuration);
+        //         byte[] decryptedBytes = await encryptionService.DecryptFileAsync(fileEntity.FilePath, fileEntity.UploadedAt);
+        //         var memoryStream = new MemoryStream(decryptedBytes);
+        //
+        //         fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
+        //         {
+        //             Headers = new HeaderDictionary(),
+        //             ContentType = "application/octet-stream"
+        //         };
+        //     }
+        //
+        //     var user = await _authRepository.GetUserById(fileDTO.UserId);
+        //     //fileEntity.UploadedByUser = user;
+        //     fileEntity.UploadedByUserId = fileDTO.UserId;
+        //     fileEntity.UploadedAt = DateTime.UtcNow;
+        //
+        //     await UploadFiles(fileRecord.File, fileEntity.Adapt<FilesDTO>());
+        //     throw new NotImplementedException();
+        // }
 
-            //    fileRecord.File = new FormFile(memoryStream, 0, memoryStream.Length, null, fileData.FileName)
-            //    {
-            //        Headers = new HeaderDictionary(),
-            //        ContentType = "application/octet-stream"
-            //    };
-            //}
-
-            //var user = await _authRepository.GetUserById(fileDTO.UserId);
-            ////fileEntity.UploadedByUser = user;
-            //fileEntity.UploadedByUserId = fileDTO.UserId;
-            //fileEntity.UploadedAt = DateTime.UtcNow;
-
-            //await UploadFiles(fileRecord.File, fileEntity.Adapt<FilesDTO>());
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<GetFilesDTO>> GetFilesSharedWithGroup(Guid groupId)
-        {
-            throw new NotImplementedException();
-            //var groupFilesPath = await _fileRepository.GetFilesSharedWithGroup(groupId);
-            //var files = await GetDecryptedFiles(groupFilesPath);
-            //return files;
-        }
-        public async Task<List<GetFilesDTO>> GetFilesSharedWithUser(Guid userId)
-        {
-            //var userFilesPath = await _fileRepository.GetFilesSharedWithUser(userId);
-            //var files = null;await GetDecryptedFiles(userFilesPath);
-            //return files;
-            throw new NotImplementedException();
-        }
+        // public async Task<List<GetFilesDTO>> GetFilesSharedWithGroup(Guid groupId)
+        // {
+        //     throw new NotImplementedException();
+        //     var groupFilesPath = await _fileRepository.GetFilesSharedWithGroup(groupId);
+        //     var files = await GetDecryptedFiles(groupFilesPath);
+        //     return files;
+        // }
+        // public async Task<List<GetFilesDTO>> GetFilesSharedWithUser(Guid userId)
+        // {
+        //     var userFilesPath = await _fileRepository.GetFilesSharedWithUser(userId);
+        //     var files = null;await GetDecryptedFiles(userFilesPath);
+        //     return files;
+        //     throw new NotImplementedException();
+        // }
         private async Task<GetFilesDTO> GetDecryptedFiles(FileEntity file)
         {
                 if (File.Exists(file.FilePath))
@@ -128,7 +130,7 @@ namespace Application.Services
                 }
             return null;
         }
-        private string GetStoragePath(long fileSize)
+        private async Task<string> GetStoragePath(long fileSize)
         {
             try
             {
@@ -143,7 +145,35 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
+                await SendEmail("misterco2002@gmail.com", "Storage error", $"{ex.Message}");
                 throw new Exception($"Nu este disponibila memorie {ex.Message}");
+            }
+            throw new Exception($"Eroare la accesare memorie");
+        }
+
+        public async Task<List<StorageInfoDTO>> GetStoragesInfo()
+        {
+            List<StorageInfoDTO> storageInfoDTOs = new List<StorageInfoDTO>();
+            try
+            {
+                foreach (var driveLetter in _storageSettings.Value.Storages)
+                {
+                    var driveInfo = new DriveInfo(driveLetter);
+                    long totalSizeMB = driveInfo.TotalSize / (1024 * 1024);
+                    long availableSpaceMB = driveInfo.TotalFreeSpace / (1024 * 1024);
+                    StorageInfoDTO storageInfo = new StorageInfoDTO(
+                        driveInfo.RootDirectory.FullName,
+                        driveInfo.IsReady,
+                        totalSizeMB,
+                        availableSpaceMB
+                    );
+                    storageInfoDTOs.Add(storageInfo);
+                }
+                return await Task.FromResult(storageInfoDTOs);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
             }
             throw new Exception($"Eroare la accesare memorie");
         }
@@ -252,5 +282,34 @@ namespace Application.Services
         //    var files = await _fileRepository.GetUserGroupFilesMetadata(userId);
         //    return files.Adapt<List<>>();
         //}
+        
+        private async Task SendEmail(string emailToReceive, string subject, string body)
+        {
+            try
+            {
+                using (var client = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    client.UseDefaultCredentials = false;
+                    client.EnableSsl = true;
+                    client.Credentials = new NetworkCredential("misterco2002@gmail.com", "yvqs lfrj osaa ygqo");
+
+                    using (var message = new MailMessage(
+                               from: new MailAddress("misterco2002@gmail.com","CatStorage"),
+                               to: new MailAddress(emailToReceive)))
+                    {
+                        message.Subject = $"Cat Storage | {subject}!";
+                        message.Body = body;
+                        message.IsBodyHtml = true;
+
+                        await client.SendMailAsync(message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
+        }
     }
 }

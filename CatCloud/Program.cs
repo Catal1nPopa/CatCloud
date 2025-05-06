@@ -1,3 +1,4 @@
+using System;
 using Application.Configuration;
 using Application.Configuration.ExceptionConfig;
 using CatCloud.ChatHub;
@@ -8,6 +9,9 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 try
 {

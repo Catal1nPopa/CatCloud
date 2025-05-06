@@ -212,11 +212,25 @@ namespace Infrastructure.Repository
             }
         }
 
+        public async Task ResetPassword(string userId, string newPassword, string newPasswordSalt)
+        {
+            try
+            {
+                var user = _dbContext.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+                user.Password = newPassword;
+                user.Salt = newPasswordSalt;
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erroare la modificare parola {ex.Message}");
+            }
+        }
+
         public async Task UpdateUser(UserInfoEntity userEntity)
         {
             try
             {
-
                 var user = await _dbContext.Users
                    .Include(u => u.UserRoles)
                     .FirstOrDefaultAsync(u => u.Id == userEntity.Id); 

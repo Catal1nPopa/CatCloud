@@ -13,5 +13,7 @@ namespace Application.Interfaces
         Task<UserInfoDTO> GetUser();
         Task<UserInfoDTO> GetUserById(Guid userId);
         Task ConfirmEmail(string token);
+        Task RequestResetPassword(string userEmail);
+        Task ResetPassword(string userId, string newPassword);
     }
 }

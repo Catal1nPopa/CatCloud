@@ -7,6 +7,7 @@ namespace Domain.Interfaces
         Task AddUser(UserEntity userEntity);
         Task<UserEntity> GetUserByUsername(string username);
         Task<UserEntity> GetUserById(Guid userId);
+        Task<UserEntity> GetUserByEmail(string email);
         Task DeleteUser(Guid userId);
         Task UpdateUser(UserInfoEntity userEntity);
         Task<List<UserInfoEntity>> GetAllUsers();
@@ -14,5 +15,6 @@ namespace Domain.Interfaces
         Task<bool> IncreaseAvailableSize(long fileSize, Guid userId);
         Task<List<UserEntity>> GetUsersNotSharedWithFile(Guid fileId, Guid currentUserId);
         Task ConfirmEmail(string token);
+        Task ResetPassword(string userId, string newPassword, string newPasswordSalt);
     }
 }

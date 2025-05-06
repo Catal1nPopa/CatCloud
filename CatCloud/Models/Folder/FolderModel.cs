@@ -1,4 +1,6 @@
-﻿namespace CatCloud.Models.Folder
+﻿using System;
+
+namespace CatCloud.Models.Folder
 {
     public class FolderModel
     {

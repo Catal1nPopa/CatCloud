@@ -1,7 +1,11 @@
-﻿using Application.DTOs.Chat;
+﻿using System;
+using Application.DTOs.Chat;
 using Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CatCloud.ChatHub
 {

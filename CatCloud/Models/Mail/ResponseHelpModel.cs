@@ -1,4 +1,6 @@
-﻿namespace CatCloud.Models.Mail
+﻿using System;
+
+namespace CatCloud.Models.Mail
 {
     public class ResponseHelpModel
     {

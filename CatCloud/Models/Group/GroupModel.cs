@@ -1,4 +1,6 @@
-﻿namespace CatCloud.Models.Group
+﻿using System;
+
+namespace CatCloud.Models.Group
 {
     public class GroupModel
     {
