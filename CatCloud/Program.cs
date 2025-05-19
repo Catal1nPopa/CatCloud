@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
+using CatCloud.NotificationHub;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,7 +31,7 @@ try
     {
         options.AddPolicy("AllowSpecificOrigins", policy =>
         {
-            policy.WithOrigins("https://localhost:3001", "http://localhost:3001", "http://localhost:4173")
+            policy.WithOrigins("https://localhost:3001", "http://localhost:3001", "http://localhost:4173", "http://localhost:80", "https://catstorage.cloud")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials()
@@ -83,6 +84,7 @@ try
     app.MapControllers();
 
     app.MapHub<ChatHub>("/chatHub");
+    app.MapHub<NotificationHub>("/notificationHub");
 
     Log.Information("Aplicatia a pornit cu succes si ruleaza...");
 

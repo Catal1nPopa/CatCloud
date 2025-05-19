@@ -5,6 +5,7 @@ using Domain.Entities.Mail;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using System.Security.Cryptography;
+using Domain.Entities.Notification;
 
 namespace Domain.Entities.Auth
 {
@@ -51,6 +52,7 @@ namespace Domain.Entities.Auth
         public ICollection<FolderEntity> Folders { get; set; }
         public ICollection<RequestHelpEntity> RequestHelps { get; set; } = new List<RequestHelpEntity>();
         public ICollection<ChatEntity> ChatMessages { get; set; } = new List<ChatEntity>();
+        public ICollection<NotificationEntity> Notifications { get; set; } = new List<NotificationEntity>();
 
     }
 }
