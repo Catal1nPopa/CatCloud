@@ -94,8 +94,13 @@ namespace Application.Services
             userData.EmailConfirmationTokenExpires = DateTime.UtcNow.AddDays(1);
             var user = new UserEntity(userData.Username, passwordHash, Convert.ToHexString(salt), userData.Email, userData.EmailConfirmed,
                 userData.TotalStorage, userData.AvailableStorage, DateTime.UtcNow, userData.EmailConfirmationToken, userData.EmailConfirmationTokenExpires);
-            
-            var confirmationLink = $"https://localhost:9001/api/auth/confirm-email?token={confirmEmailToken}";
+            string frontendBaseUrl;
+#if DEBUG
+            frontendBaseUrl = "https://localhost:9001";
+#else
+            frontendBaseUrl = "https://api.catstorage.cloud";
+#endif
+            var confirmationLink = $"{frontendBaseUrl}/api/auth/confirm-email?token={confirmEmailToken}";
             var body = $@"
     <div style='font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;'>
         <h2 style='color: #333;'>Salut {user.Username},</h2>
@@ -157,7 +162,13 @@ namespace Application.Services
         {
             var user = await _authRepository.GetUserByEmail(userEmail);
             var token = user.Id;
-            var confirmationLink = $"https://localhost:3001/reset-password?token={token}";
+            string frontendBaseUrl;
+#if DEBUG
+            frontendBaseUrl = "https://localhost:3001";
+#else
+            frontendBaseUrl = "https://catstorage.cloud";
+#endif
+            var confirmationLink = $"{frontendBaseUrl}/reset-password?token={token}";
             var body = $@"
     <div style='font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9;'>
         <h2 style='color: #333;'>Salut {user.Username},</h2>

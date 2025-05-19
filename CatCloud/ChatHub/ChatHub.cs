@@ -14,11 +14,9 @@ namespace CatCloud.ChatHub
         public Task ReceiveMessage(string userName, string message);
         Task UsersOnline(List<string> usernames);
     }
-    public class ChatHub(IAuthService authService, IChatService chatService) : Hub<IChatClient>
+    public class ChatHub(IAuthService _authService, IChatService _chatService) : Hub<IChatClient>
     {
         private static readonly ConcurrentDictionary<string, UserConnection> _connections = new();
-        private readonly IAuthService _authService = authService;
-        private readonly IChatService _chatService = chatService;
         public async Task JoinChat(UserConnection connection)
         {
             var user = await _authService.GetUserById(connection.UserId);
@@ -44,7 +42,7 @@ namespace CatCloud.ChatHub
 
             await Clients.Group(connection.ChatRoom.ToString())
                 .UsersOnline(usersOnline);
-
+ 
         }
 
         public async Task LeaveChat()
@@ -57,8 +55,6 @@ namespace CatCloud.ChatHub
                 //    .ReceiveMessage("Admin", $"{connection.UserName} a părăsit {connection.ChatRoom}");
             }
         }
-
-
         public async Task SendMessage(string message)
         {
             if (_connections.TryGetValue(Context.ConnectionId, out var connection))

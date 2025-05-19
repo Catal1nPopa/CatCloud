@@ -111,14 +111,20 @@ namespace CatCloud.Controllers
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string token)
         {
+            string frontendBaseUrl;
+#if DEBUG
+            frontendBaseUrl = "http://localhost:3001";
+#else
+            frontendBaseUrl = "https://catstorage.cloud";
+#endif
             try
             {
                 await _authService.ConfirmEmail(token);
-                return Redirect("http://localhost:3001/email-confirmed");
+                return Redirect($"{frontendBaseUrl}/email-confirmed");
             }
             catch (Exception ex)
             {
-                return Redirect($"http://localhost:3001/email-error"); 
+                return Redirect($"{frontendBaseUrl}/email-error"); 
             }
         }
 

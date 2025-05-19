@@ -22,6 +22,7 @@ namespace Application.Configuration
             services.AddScoped<IStatisticsService, StatisticsService>();
             services.AddScoped<ISendMailService, SendMailService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.AddHttpContextAccessor();
             services.Configure<StorageSettings>(configuration.GetSection("StorageSettings"));

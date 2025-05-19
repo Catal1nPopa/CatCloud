@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Application.DTOs.Notification;
 using Application.DTOs.UserGroup;
 using Application.Interfaces;
 using CatCloud.Models.Group;
+using CatCloud.Models.Notification;
 using CatCloud.Models.User;
-using Domain.Entities.UserGroup;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CatCloud.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserGroupController(IUserGroupService userGroupService) : ControllerBase
+    public class UserGroupController(IUserGroupService _userGroupService, IHubContext<NotificationHub.NotificationHub> notification, INotificationService notificationService) : ControllerBase
     {
-        private readonly IUserGroupService _userGroupService = userGroupService;
-
         [Authorize]
         [HttpPost("AddGroup")]
         public async Task<IActionResult> AddGroup(CreateGroupModel group)
@@ -61,6 +57,17 @@ namespace CatCloud.Controllers
         public async Task<IActionResult> LinkUserToGroup(UserToGroupModel userToGroup)
         {
             await _userGroupService.LinkUserToGroup(userToGroup.Adapt<UserToGroupDTO>());
+            foreach (var userId in userToGroup.UserIds)
+            {
+                var notificationModel = new NotificationModel
+                {
+                    Message = "Ați fost adăugat într-un grup nou",
+                    Timestamp = DateTime.UtcNow,
+                    UserId = userId
+                };
+                await notification.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", new { message = notificationModel.Message, timestamp = notificationModel.Timestamp });
+                await notificationService.SaveNotification(notificationModel.Adapt<NotificationDTO>());
+            }
             return Ok();
         }
 

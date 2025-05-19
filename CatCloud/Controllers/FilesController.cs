@@ -11,13 +11,16 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using Application.DTOs.Notification;
+using CatCloud.Models.Notification;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CatCloud.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FilesController(IFilesService filesService) : ControllerBase
+    public class FilesController(IFilesService filesService, IHubContext<NotificationHub.NotificationHub> notificationHub, INotificationService notificationService) : ControllerBase
     {
         private readonly IFilesService _filesService = filesService;
 
@@ -62,6 +65,17 @@ namespace CatCloud.Controllers
             try
             {
                 await _filesService.ShareFileWithUsers(shareFileModel.fileId, shareFileModel.objectIds);
+                foreach (var userId in shareFileModel.objectIds)
+                {
+                    var notification = new NotificationModel
+                    {
+                        Message = "Aveți un fișier nou partajat",
+                        Timestamp = DateTime.UtcNow,
+                        UserId = userId
+                    };
+                    await notificationHub.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", new { message = notification.Message, timestamp = notification.Timestamp });
+                    await notificationService.SaveNotification(notification.Adapt<NotificationDTO>());
+                }
                 return Ok(new { Message = $"Fisierul a fost partajat cu {shareFileModel.objectIds.Count} utilizatori" });
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

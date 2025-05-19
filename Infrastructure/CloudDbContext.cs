@@ -3,6 +3,7 @@ using Domain.Entities.Chat;
 using Domain.Entities.Files;
 using Domain.Entities.Folder;
 using Domain.Entities.Mail;
+using Domain.Entities.Notification;
 using Domain.Entities.Permission;
 using Domain.Entities.UserGroup;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ namespace Infrastructure
         public DbSet<FolderEntity> Folders { get; set; }
         public DbSet<RequestHelpEntity> RequestHelps { get; set; }
         public DbSet<ChatEntity> ChatMessages { get; set; }
+        public DbSet<NotificationEntity> Notifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -114,7 +116,12 @@ namespace Infrastructure
                 .WithMany(g => g.ChatMessages)
                 .HasForeignKey(c => c.GroupId)
                 .OnDelete(DeleteBehavior.SetNull);
-
+            
+            modelBuilder.Entity<NotificationEntity>()
+                .HasOne(n => n.User)
+                .WithMany(notifications => notifications.Notifications)
+                .HasForeignKey(fk => fk.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }
