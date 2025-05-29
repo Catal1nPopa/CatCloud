@@ -19,29 +19,37 @@ namespace CatCloud.ChatHub
         private static readonly ConcurrentDictionary<string, UserConnection> _connections = new();
         public async Task JoinChat(UserConnection connection)
         {
-            var user = await _authService.GetUserById(connection.UserId);
-            await Groups.AddToGroupAsync(Context.ConnectionId, connection.ChatRoom.ToString());
-
-            _connections[Context.ConnectionId] = connection;
-
-            await Clients.Group(connection.ChatRoom.ToString())
-                .ReceiveMessage("", $"{user.Username} s-a conectat!");
-
-            var pastMessages = await _chatService.GetMessagesDTOs(connection.ChatRoom);
-            foreach (var msg in pastMessages)
+            try
             {
-                await Clients.Caller.ReceiveMessage(msg.Username, msg.Message);
+
+                var user = await _authService.GetUserById(connection.UserId);
+                await Groups.AddToGroupAsync(Context.ConnectionId, connection.ChatRoom.ToString());
+
+                _connections[Context.ConnectionId] = connection;
+
+                await Clients.Group(connection.ChatRoom.ToString())
+                    .ReceiveMessage("", $"{user.Username} s-a conectat!");
+
+                var pastMessages = await _chatService.GetMessagesDTOs(connection.ChatRoom);
+                foreach (var msg in pastMessages)
+                {
+                    await Clients.Caller.ReceiveMessage(msg.Username, msg.Message);
+                }
+
+                var usersOnline = _connections
+                    .Where(x => x.Value.ChatRoom == connection.ChatRoom)
+                    .Select(async x => (await _authService.GetUserById(x.Value.UserId)).Username)
+                    .Select(t => t.Result)
+                    .Distinct()
+                    .ToList();
+
+                await Clients.Group(connection.ChatRoom.ToString())
+                    .UsersOnline(usersOnline);
             }
-
-            var usersOnline = _connections
-                .Where(x => x.Value.ChatRoom == connection.ChatRoom)
-                .Select(async x => (await _authService.GetUserById(x.Value.UserId)).Username)
-                .Select(t => t.Result)
-                .Distinct()
-                .ToList();
-
-            await Clients.Group(connection.ChatRoom.ToString())
-                .UsersOnline(usersOnline);
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
  
         }
 
@@ -50,9 +58,6 @@ namespace CatCloud.ChatHub
             if (_connections.TryRemove(Context.ConnectionId, out var connection))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.ChatRoom.ToString());
-
-                //await Clients.Group(connection.ChatRoom)
-                //    .ReceiveMessage("Admin", $"{connection.UserName} a părăsit {connection.ChatRoom}");
             }
         }
         public async Task SendMessage(string message)

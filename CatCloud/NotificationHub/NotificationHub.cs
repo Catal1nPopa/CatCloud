@@ -26,9 +26,4 @@ public class NotificationHub(INotificationService notificationService) : Hub
 
         await base.OnDisconnectedAsync(exception);
     }
-
-    // public async Task<List<NotificationDTO>> GetNotifications(string userId)
-    // {
-    //     return await notificationService.GetNotifications(userId);
-    // }
 }

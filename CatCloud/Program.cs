@@ -82,7 +82,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
-
+    
     app.MapHub<ChatHub>("/chatHub");
     app.MapHub<NotificationHub>("/notificationHub");
 
