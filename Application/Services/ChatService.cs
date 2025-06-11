@@ -27,5 +27,11 @@ namespace Application.Services
         {
             await _chatService.SaveMessage(messageDTO.Adapt<ChatEntity>());
         }
+
+        public async Task<List<Guid>> GetUserIdsInGroup(Guid chatRoomId)
+        {
+            var userIds = await _chatService.GetUserIdsInGroup(chatRoomId);
+            return userIds;
+        }
     }
 }

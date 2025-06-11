@@ -3,9 +3,9 @@ using Application.DTOs.Chat;
 using Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Application.DTOs.Notification;
+using CatCloud.Models.Notification;
+using Mapster;
 
 namespace CatCloud.ChatHub
 {
@@ -14,7 +14,8 @@ namespace CatCloud.ChatHub
         public Task ReceiveMessage(string userName, string message);
         Task UsersOnline(List<string> usernames);
     }
-    public class ChatHub(IAuthService _authService, IChatService _chatService) : Hub<IChatClient>
+    public class ChatHub(IAuthService _authService, IChatService _chatService, IHubContext<NotificationHub.NotificationHub> notification,
+        INotificationService notificationService, IUserGroupService userGroupService) : Hub<IChatClient>
     {
         private static readonly ConcurrentDictionary<string, UserConnection> _connections = new();
         public async Task JoinChat(UserConnection connection)
@@ -75,6 +76,34 @@ namespace CatCloud.ChatHub
                     UserId = connection.UserId,
                     Timestamp = DateTime.UtcNow
                 });
+                
+                var groupMembers = await _chatService.GetUserIdsInGroup(connection.ChatRoom);
+                
+                var connectedUserIdsInGroup = _connections
+                    .Where(x => x.Value.ChatRoom == connection.ChatRoom)
+                    .Select(x => x.Value.UserId)
+                    .Distinct()
+                    .ToList();
+                var offlineUsers = groupMembers.Except(connectedUserIdsInGroup);
+                
+                var group = await userGroupService.GetGroup(connection.ChatRoom);
+                
+                foreach (var userId in offlineUsers)
+                {
+                    var notificationModel = new NotificationModel
+                    {
+                        Message = $"Ai un mesaj nou în grupul: {group.Name}",
+                        Timestamp = DateTime.UtcNow,
+                        UserId = userId
+                    };
+                    await notification.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", new { message = notificationModel.Message, timestamp = notificationModel.Timestamp });
+                    await notificationService.SaveNotification(notificationModel.Adapt<NotificationDTO>());
+
+                    await notificationService.SaveNotification(notificationModel.Adapt<NotificationDTO>());
+
+                    await notification.Clients.Group(userId.ToString())
+                        .SendAsync("ReceiveNotification", notificationModel);
+                }
             }
         }
 

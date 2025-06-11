@@ -43,5 +43,15 @@ namespace Infrastructure.Repository
                 throw new Exception($"{ex.Message}");
             }
         }
+
+        public async Task<List<Guid>> GetUserIdsInGroup(Guid chatRoomId)
+        {
+            var groupIDs = await _dbContext.UserGroups
+                .Where(g => g.GroupId == chatRoomId)
+                .Select(g => g.UserId)
+                .ToListAsync();
+
+            return groupIDs;
+        }
     }
 }

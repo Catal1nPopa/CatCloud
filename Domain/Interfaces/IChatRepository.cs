@@ -7,5 +7,6 @@ namespace Domain.Interfaces
     {
         Task<List<ChatEntity>> GetHistoryMessage(Guid chatRoomId);
         Task SaveMessage(ChatEntity chatEntity);
+        Task<List<Guid>> GetUserIdsInGroup(Guid chatRoomId);
     }
 }
