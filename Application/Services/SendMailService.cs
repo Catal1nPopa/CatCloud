@@ -10,11 +10,9 @@ using Domain.Entities.Mail;
 
 namespace Application.Services
 {
-    public class SendMailService(IAuthService authService, IHelpRepository helpRepository) : ISendMailService
+    public class SendMailService(IAuthService _authService, IHelpRepository _helpRepository) : ISendMailService
     {
         //yvqs lfrj osaa ygqo
-        private readonly IAuthService _authService = authService;
-        private readonly IHelpRepository _helpRepository = helpRepository;
         public async Task<bool> SendReuqestMoreSpace()
         {
             try

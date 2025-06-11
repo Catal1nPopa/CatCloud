@@ -15,13 +15,10 @@ using System.Text;
 
 namespace Application.Services
 {
-    public class AuthService(IAuthRepository authRepository, 
-        IConfiguration configuration,
-        IUserProvider userProvider) : IAuthService
+    public class AuthService(IAuthRepository _authRepository, 
+        IConfiguration _configuration,
+        IUserProvider _userProvider) : IAuthService
     {
-        private readonly IAuthRepository _authRepository = authRepository;
-        private readonly IConfiguration _configuration = configuration;
-        private readonly IUserProvider _userProvider = userProvider;
         public async Task<string> GetAuthentication(UserCredentialDTO authRequest)
         {
             try

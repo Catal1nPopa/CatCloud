@@ -16,5 +16,6 @@ namespace Application.Interfaces
         Task<List<GroupDTO>> GetUserGroups();
         Task<List<GroupDTO>> GetGroupsNotSharedWithFile(Guid fileId);
         Task<List<UserInfoDTO>> GetUsersToLink(Guid groupId);   
+        Task<GroupDTO> GetGroup(Guid groupId);
     }
 }

@@ -65,5 +65,11 @@ namespace Application.Services
             var users = await _groupRepository.GetUsersToLink(groupId);
             return users.Adapt<List<UserInfoDTO>> ();
         }
+
+        public async Task<GroupDTO> GetGroup(Guid groupId)
+        {
+            var group = await _groupRepository.GetGroup(groupId);
+            return group.Adapt<GroupDTO>();
+        }
     }
 }

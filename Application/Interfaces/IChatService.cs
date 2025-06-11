@@ -8,5 +8,6 @@ namespace Application.Interfaces
     {
         Task<List<MessagesDTO>> GetMessagesDTOs(Guid chatRoomId);
         Task SaveMessage(SaveMessageDTO messageDTO);
+        Task<List<Guid>> GetUserIdsInGroup(Guid chatRoomId);
     }
 }

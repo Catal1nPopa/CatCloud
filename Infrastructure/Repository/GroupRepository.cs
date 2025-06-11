@@ -242,5 +242,11 @@ namespace Infrastructure.Repository
                 throw new Exception($"{ex.Message}");
             }
         }
+
+        public async Task<GroupEntity> GetGroup(Guid groupId)
+        {
+            var group = await _dbContext.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+            return group;
+        }
     }
 }
